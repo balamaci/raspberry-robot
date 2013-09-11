@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>HTML5 boilerplate – all you really need…</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.knob.js"></script>
+    <script src="/js/socket.io.js"></script>
+</head>
+
+<body id="home">
+
+<input type="text" value="0" class="dial">
+
+<script>
+    var socket = io.connect('ws://localhost:8000');
+    $(".dial").knob({
+        min : 0,
+        max : 100,
+        'skin':"tron",
+        'change' : function (value) {
+            console.log(value);
+            socket.emit('lengine', { val : value});
+        }
+    });
+</script>
+
+</body>
+</html>
