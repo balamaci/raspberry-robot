@@ -38,19 +38,18 @@ void setup()
   horizServo.attach(9);  // attaches the servo on pin 9 to the servo object 
   vertServo.attach(10);
   
-  Serial.begin(9600);
+  Serial.begin(4800);
 } 
  
  
 void loop() 
 { 
     while (Serial.available()) {
-      Serial.print("A");
+      //Serial.print("A");
       char recieved = Serial.read();    
             
       if (recieved == '*') {        
         if(inData.startsWith("hcam")) {
-//          Serial.print("Poz " + inData + " - " + inData.substring(4));
           horPoz =  inData.substring(4).toInt();
           horizServo.write(horPoz);
         }
@@ -59,8 +58,8 @@ void loop()
           vertServo.write(vertPoz);
         }
 
-        Serial.print("Received ");
-        Serial.println(inData);
+//        Serial.print("Received ");
+//        Serial.println(inData);
         
         if(inData.startsWith("all_eng")) {
           L_EngOn = true;
@@ -115,7 +114,7 @@ void loop()
         inData = ""; //clear previous message
         
       } else {
-        Serial.print("R");Serial.print(recieved);
+        //Serial.print("R");Serial.print(recieved);
          inData += recieved;          
       }  
     }
@@ -130,14 +129,14 @@ void loop()
     }
 
     if(L_EngOn || R_EngOn) {
-      Serial.print("LE");
-      Serial.print(L_EngOn);
-      Serial.print("RE");
-      Serial.print(R_EngOn);
-      Serial.print(" motor");
-      Serial.println(timeMotor);
+//      Serial.print("LE");
+//      Serial.print(L_EngOn);
+//      Serial.print("RE");
+//      Serial.print(R_EngOn);
+//      Serial.print(" motor");
+//      Serial.println(timeMotor);
       
-      if(timeMotor > 1000) {
+      if(timeMotor > 500) {
         stopEngines();            
       } else {
           delay(100);
@@ -149,8 +148,8 @@ void loop()
 }
 
 void startLeftEngine() {
-  Serial.print("startLeft ");
-  Serial.println(R_EngFwd);
+  //Serial.print("startLeft ");
+  //Serial.println(R_EngFwd);
   
   if(L_EngFwd) {
     digitalWrite(IN1, HIGH);
@@ -163,8 +162,8 @@ void startLeftEngine() {
 }
 
 void startRightEngine() {
-  Serial.print("startRight ");
-  Serial.print(R_EngFwd);        
+  //Serial.print("startRight ");
+  //Serial.print(R_EngFwd);
   
   if(R_EngFwd) {
     digitalWrite(IN3, HIGH);
@@ -178,7 +177,7 @@ void startRightEngine() {
 }
 
 void stopEngines() {  
-  Serial.println("Stoping engine");
+  //Serial.println("Stoping engine");
   digitalWrite(IN2, LOW); 
   digitalWrite(IN4, LOW); 
   
