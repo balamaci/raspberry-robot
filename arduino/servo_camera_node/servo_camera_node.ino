@@ -19,8 +19,11 @@ int vertPoz = 0;
 int L_EngOn = false;
 int R_EngOn = false;
 
+int L_EngFwd = true;
+int R_EngFwd = true;
+
 int motorSpeed = 0;
-int timeMotor = 0;
+unsigned int timeMotor = 0;
 
 void setup() 
 { 
@@ -42,6 +45,7 @@ void setup()
 void loop() 
 { 
     while (Serial.available()) {
+      Serial.print("A");
       char recieved = Serial.read();    
             
       if (recieved == '*') {        
@@ -54,26 +58,64 @@ void loop()
           vertPoz =  inData.substring(4).toInt();
           vertServo.write(vertPoz);
         }
+
+        Serial.print("Received ");
+        Serial.println(inData);
+        
         if(inData.startsWith("all_eng")) {
           L_EngOn = true;
           R_EngOn = true;
           timeMotor=0;
           motorSpeed =  inData.substring(7).toInt();
         }
+        
+        if(inData.startsWith("rev_all_eng")) {
+          L_EngOn = true;
+          L_EngFwd = false;
+          
+          R_EngOn = true;
+          R_EngFwd = false;
+          
+          timeMotor=0;
+          motorSpeed =  inData.substring(11).toInt();
+        }
+        
         if(inData.startsWith("reng")) {
           R_EngOn = true;
+          R_EngFwd = true;
+
           timeMotor=0;
           motorSpeed =  inData.substring(4).toInt();
         }
+        
+        if(inData.startsWith("rev_reng")) {
+          R_EngOn = true;
+          R_EngFwd = false;
+
+          timeMotor=0;
+          motorSpeed =  inData.substring(8).toInt();
+        }
+        
         if(inData.startsWith("leng")) {
           L_EngOn = true;
+          L_EngFwd = true;
+          
           timeMotor=0;
           motorSpeed =  inData.substring(4).toInt();
+        }
+        
+        if(inData.startsWith("rev_leng")) {
+          L_EngOn = true;
+          L_EngFwd = false;
+          
+          timeMotor=0;
+          motorSpeed =  inData.substring(8).toInt();
         }
         
         inData = ""; //clear previous message
         
       } else {
+        Serial.print("R");Serial.print(recieved);
          inData += recieved;          
       }  
     }
@@ -88,6 +130,13 @@ void loop()
     }
 
     if(L_EngOn || R_EngOn) {
+      Serial.print("LE");
+      Serial.print(L_EngOn);
+      Serial.print("RE");
+      Serial.print(R_EngOn);
+      Serial.print(" motor");
+      Serial.println(timeMotor);
+      
       if(timeMotor > 1000) {
         stopEngines();            
       } else {
@@ -100,28 +149,44 @@ void loop()
 }
 
 void startLeftEngine() {
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW); 
+  Serial.print("startLeft ");
+  Serial.println(R_EngFwd);
   
+  if(L_EngFwd) {
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW); 
+  } else {
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, HIGH);     
+  }
   analogWrite(ENA, motorSpeed);
 }
 
 void startRightEngine() {
-  digitalWrite(IN3, HIGH);
-  digitalWrite(IN4, LOW);
+  Serial.print("startRight ");
+  Serial.print(R_EngFwd);        
+  
+  if(R_EngFwd) {
+    digitalWrite(IN3, HIGH);
+    digitalWrite(IN4, LOW);
+  } else {
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, HIGH);    
+  }
   
   analogWrite(ENB, motorSpeed);
 }
 
-void stopEngines() {
-  L_EngOn = false;
-  R_EngOn = false;
-  
+void stopEngines() {  
+  Serial.println("Stoping engine");
   digitalWrite(IN2, LOW); 
   digitalWrite(IN4, LOW); 
   
   analogWrite(ENA, 0);
   analogWrite(ENB, 0);
   
+  L_EngOn = false;
+  R_EngOn = false;
+
   timeMotor = 0;
 }
