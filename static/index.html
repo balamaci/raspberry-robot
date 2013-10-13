@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>HTML5 boilerplate – all you really need…</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Robot control</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
 
     <script src="/js/jquery.min.js"></script>
     <script src="/js/jquery.knob.js"></script>
@@ -12,19 +12,79 @@
 
 <body id="home">
 
-<input type="text" value="0" class="dial">
+<div class="container">
+    <div class="row">
+        <div class="col-md-offset-2 col-md-2" >
+            <a id="forward" href="#" class="btn btn-lg btn-danger">
+                <span class="glyphicon glyphicon-circle-arrow-up"></span>
+                Forward
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+            <a id="left" href="#" class="btn btn-lg btn-info">
+                <span class="glyphicon glyphicon-circle-arrow-left"></span>
+                Left
+            </a>
+        </div>
+
+        <div class="col-md-offset-4 col-md-2">
+            <a id="right" href="#" class="btn btn-lg btn-info">
+                <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                Right
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-offset-2 col-md-2">
+            <a id="back" href="#" class="btn btn-lg btn-danger">
+                <span class="glyphicon glyphicon-circle-arrow-down"></span>
+                Back
+            </a>
+        </div>
+    </div>
+
+    <div class="row" style="margin-top: 50px;">
+        <div class="col-md-1">
+            <input id="speed" type="text" value="0" class="dial">
+        </div>
+    </div>
+
+</div>
 
 <script>
     var socket = io.connect('ws://localhost:8000');
-    $(".dial").knob({
+    var speedKnob = $("#speed");
+    speedKnob.knob({
         min : 0,
-        max : 100,
+        max : 6,
         'skin':"tron",
         'change' : function (value) {
             console.log(value);
-            socket.emit('lengine', { val : value});
         }
     });
+
+    $("#forward").on("click", function(ev) {
+        ev.preventDefault();
+
+        socket.emit('all_engine', { val : speedKnob.val()});
+    });
+    $("#left").on("click", function(ev) {
+        ev.preventDefault();
+        socket.emit('lengine', { val : speedKnob.val()});
+    });
+    $("#right").on("click", function(ev) {
+        ev.preventDefault();
+        socket.emit('rengine', { val : speedKnob.val()});
+    });
+    $("#back").on("click", function(ev) {
+        ev.preventDefault();
+        socket.emit('rev_all_engine', { val : speedKnob.val()});
+    });
+
 </script>
 
 </body>
