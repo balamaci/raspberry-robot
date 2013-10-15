@@ -43,9 +43,9 @@ void setup()
  
  
 void loop() 
-{ 
-    while (Serial.available()) {
-      //Serial.print("A");
+{
+    if(Serial.available() > 0) {
+     while (Serial.available() > 0) {
       char recieved = Serial.read();    
             
       if (recieved == '*') {        
@@ -58,12 +58,16 @@ void loop()
           vertServo.write(vertPoz);
         }
 
-//        Serial.print("Received ");
-//        Serial.println(inData);
+        Serial.print("Received ");
+        Serial.println(inData);
         
         if(inData.startsWith("all_eng")) {
           L_EngOn = true;
+          L_EngFwd = true;
+          
           R_EngOn = true;
+          R_EngFwd = true;
+          
           timeMotor=0;
           motorSpeed =  inData.substring(7).toInt();
         }
@@ -114,9 +118,9 @@ void loop()
         inData = ""; //clear previous message
         
       } else {
-        //Serial.print("R");Serial.print(recieved);
          inData += recieved;          
       }  
+     }
     }
     
     if(timeMotor == 0) {
@@ -129,12 +133,14 @@ void loop()
     }
 
     if(L_EngOn || R_EngOn) {
-//      Serial.print("LE");
-//      Serial.print(L_EngOn);
-//      Serial.print("RE");
-//      Serial.print(R_EngOn);
-//      Serial.print(" motor");
-//      Serial.println(timeMotor);
+      Serial.print("LE=");
+      Serial.print(L_EngOn);
+
+      Serial.print(" RE=");
+      Serial.print(R_EngOn);
+
+      Serial.print(" time=");
+      Serial.println(timeMotor);
       
       if(timeMotor > 500) {
         stopEngines();            
@@ -143,13 +149,12 @@ void loop()
           timeMotor += 100;
       }      
     }
-    
-//    Serial.print('Indata ' + inData);
+
 }
 
 void startLeftEngine() {
-  //Serial.print("startLeft ");
-  //Serial.println(R_EngFwd);
+  Serial.print("startLeft FWD=");
+  Serial.println(L_EngFwd);
   
   if(L_EngFwd) {
     digitalWrite(IN1, HIGH);
@@ -162,8 +167,8 @@ void startLeftEngine() {
 }
 
 void startRightEngine() {
-  //Serial.print("startRight ");
-  //Serial.print(R_EngFwd);
+  Serial.print("startRight FWD=");
+  Serial.println(R_EngFwd);
   
   if(R_EngFwd) {
     digitalWrite(IN3, HIGH);
@@ -177,7 +182,7 @@ void startRightEngine() {
 }
 
 void stopEngines() {  
-  //Serial.println("Stoping engine");
+  Serial.println("Stopping engine");
   digitalWrite(IN2, LOW); 
   digitalWrite(IN4, LOW); 
   
