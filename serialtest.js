@@ -17,12 +17,63 @@
             console.log('data received: ' + data);
         });
 
-        async.series([leftEngineOn,
-            function (callback) { setTimeout(rightEngineOn(callback), 3000); },
-            function (callback) { setTimeout(leftEngineOn(callback), 4000); },
-            function (callback) { setTimeout(allEnginesOn(callback), 3000); }
-        ]);
+        doTest();
     });
+
+    function doTest() {
+        async.series([leftEngineOn,
+            function (callback) {
+                setTimeout(function() {
+                    rightEngineOn(callback);
+                }, 900);
+            },
+            function (callback) {
+                setTimeout(function() {
+                    leftEngineOn(callback);
+                }, 800);
+            },
+            function (callback) {
+                setTimeout(function() {
+                    allEnginesRev(callback);
+                }, 900);
+            },
+            function (callback) {
+                setTimeout(function() {
+                    allEnginesRev(callback);
+                }, 1000);
+            },
+            function (callback) {
+                setTimeout(function() {
+                    leftEngineOn(callback);
+                }, 1000);
+            },
+            function (callback) {
+                setTimeout(function() {
+                    allEnginesOn(callback);
+                }, 900);
+            },
+            function (callback) {
+                setTimeout(function() {
+                    rightEngineOn(callback);
+                }, 1000);
+            },
+            function (callback) {
+                setTimeout(function() {
+                    allEnginesRev(callback);
+                }, 900);
+            },
+            function (callback) {
+                setTimeout(function() {
+                    leftEngineOn(callback);
+                }, 1000);
+            },
+            function() {
+                setTimeout(function() {
+                    doTest();
+                }, 2000);
+            }
+        ]);
+    }
 
     function leftEngineOn(callback) {
         var command = "leng"+ getArduinoSpeed(baseSpeed) + "*";
@@ -39,7 +90,7 @@
         console.log('RightEngine: ' + command);
 
         arduinoSerial.write(command, function(err, results) {
-            console.log('err ' + err);
+//            console.log('err ' + err);
             callback(null);
         });
     }
@@ -49,7 +100,7 @@
             console.log('AllEngine: ' + command);
 
             arduinoSerial.write(command, function(err, results) {
-                console.log('err ' + err);
+//                console.log('err ' + err);
                 callback(null);
             });
     }
@@ -59,7 +110,7 @@
         console.log('ReverseEngine: ' + command);
 
         arduinoSerial.write(command, function(err, results) {
-            console.log('err ' + err);
+//            console.log('err ' + err);
             callback(null);
         });
     }
