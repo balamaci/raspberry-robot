@@ -25,7 +25,7 @@
             function (callback) {
                 setTimeout(function() {
                     rightEngineOn(callback);
-                }, 900);
+                }, 700);
             },
             function (callback) {
                 setTimeout(function() {
@@ -35,42 +35,42 @@
             function (callback) {
                 setTimeout(function() {
                     allEnginesRev(callback);
-                }, 900);
+                }, 600);
             },
             function (callback) {
                 setTimeout(function() {
                     allEnginesRev(callback);
-                }, 1000);
+                }, 900);
             },
             function (callback) {
                 setTimeout(function() {
                     leftEngineOn(callback);
-                }, 1000);
+                }, 700);
             },
             function (callback) {
                 setTimeout(function() {
                     allEnginesOn(callback);
-                }, 900);
+                }, 600);
             },
             function (callback) {
                 setTimeout(function() {
                     rightEngineOn(callback);
-                }, 1000);
+                }, 600);
             },
             function (callback) {
                 setTimeout(function() {
                     allEnginesRev(callback);
-                }, 900);
+                }, 700);
             },
             function (callback) {
                 setTimeout(function() {
                     leftEngineOn(callback);
-                }, 1000);
+                }, 800);
             },
             function() {
                 setTimeout(function() {
                     doTest();
-                }, 2000);
+                }, 1000);
             }
         ]);
     }
