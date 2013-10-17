@@ -5,6 +5,19 @@
         serialport = require("serialport"),
         SerialPort  = serialport.SerialPort;
 
+    var tests = [
+            [leftEngineOn, 10],
+            [rightEngineOn, 1700],
+            [leftEngineOn, 1800],
+            [allEnginesRev, 600],
+            [allEnginesOn, 900],
+            [leftEngineOn, 700],
+            [allEnginesOn, 600],
+            [rightEngineOn, 800],
+            [allEnginesRev, 700]
+        ],
+        testCount = 0;
+
     var baseSpeed = 180; //the base speed from which the motors start up
 
     var arduinoSerial = new SerialPort("/dev/ttyACM0", {
@@ -17,101 +30,61 @@
             console.log('data received: ' + data);
         });
 
-        doTest();
+        doNextTest();
     });
 
-    function doTest() {
-        async.series([leftEngineOn,
-            function (callback) {
-                setTimeout(function() {
-                    rightEngineOn(callback);
-                }, 700);
-            },
-            function (callback) {
-                setTimeout(function() {
-                    leftEngineOn(callback);
-                }, 800);
-            },
-            function (callback) {
-                setTimeout(function() {
-                    allEnginesRev(callback);
-                }, 600);
-            },
-            function (callback) {
-                setTimeout(function() {
-                    allEnginesRev(callback);
-                }, 900);
-            },
-            function (callback) {
-                setTimeout(function() {
-                    leftEngineOn(callback);
-                }, 700);
-            },
-            function (callback) {
-                setTimeout(function() {
-                    allEnginesOn(callback);
-                }, 600);
-            },
-            function (callback) {
-                setTimeout(function() {
-                    rightEngineOn(callback);
-                }, 600);
-            },
-            function (callback) {
-                setTimeout(function() {
-                    allEnginesRev(callback);
-                }, 700);
-            },
-            function (callback) {
-                setTimeout(function() {
-                    leftEngineOn(callback);
-                }, 800);
-            },
-            function() {
-                setTimeout(function() {
-                    doTest();
-                }, 1000);
-            }
-        ]);
+    function doNextTest() {
+        var testFunction = tests[testCount][0];
+        var timeout = tests[testCount][1];
+
+        setTimeout(function() {
+            testFunction.call();
+        }, timeout);
+
+        testCount++;
+
+        if(testCount >= tests.length) {
+            testCount = 0;
+        }
     }
 
-    function leftEngineOn(callback) {
+    function leftEngineOn() {
         var command = "leng"+ getArduinoSpeed(baseSpeed) + "*";
         console.log('LeftEngine ' + command);
 
         arduinoSerial.write(command, function(err, results) {
             console.log('err ' + err);
-            callback(null);
+            doNextTest();
         });
     }
 
-    function rightEngineOn(callback) {
+    function rightEngineOn() {
         var command = "reng" + getArduinoSpeed(baseSpeed) + "*";
         console.log('RightEngine: ' + command);
 
         arduinoSerial.write(command, function(err, results) {
 //            console.log('err ' + err);
-            callback(null);
+            doNextTest();
         });
     }
 
-    function allEnginesOn(callback) {
+    function allEnginesOn() {
             var command = "all_eng" + getArduinoSpeed(baseSpeed) + "*";
             console.log('AllEngine: ' + command);
 
             arduinoSerial.write(command, function(err, results) {
 //                console.log('err ' + err);
-                callback(null);
+                doNextTest();
             });
     }
 
-    function allEnginesRev(callback) {
+    function allEnginesRev() {
         var command = "rev_all_eng" + getArduinoSpeed(baseSpeed) + "*";
         console.log('ReverseEngine: ' + command);
 
         arduinoSerial.write(command, function(err, results) {
 //            console.log('err ' + err);
-            callback(null);
+            doNextTest();
         });
     }
 
