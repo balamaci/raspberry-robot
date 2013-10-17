@@ -3,13 +3,13 @@
 Servo horizServo;  
 Servo vertServo;
 
-int ENA=3;
-int IN1=2;
-int IN2=4;
+int ENA=9;
+int IN1=7;
+int IN2=8;
 
-int ENB=5;
-int IN3=7;
-int IN4=8;
+int ENB=3;
+int IN3=2;
+int IN4=4;
 
  
 String inData = "";
@@ -35,8 +35,8 @@ void setup()
   pinMode(IN3, OUTPUT);
   pinMode(IN4, OUTPUT);
 
-  horizServo.attach(9);  // attaches the servo on pin 9 to the servo object 
-  vertServo.attach(10);
+//  horizServo.attach(9);  // attaches the servo on pin 9 to the servo object 
+//  vertServo.attach(10);
   
   Serial.begin(4800);
 } 
@@ -44,7 +44,7 @@ void setup()
  
 void loop() 
 {
-    if(Serial.available() > 0) {
+    if(Serial.available()) {
      while (Serial.available() > 0) {
       char recieved = Serial.read();    
             
@@ -133,20 +133,19 @@ void loop()
     }
 
     if(L_EngOn || R_EngOn) {
-      Serial.print("LE=");
-      Serial.print(L_EngOn);
+      //Serial.print("LE=");
+      //Serial.print(L_EngOn);
 
-      Serial.print(" RE=");
-      Serial.print(R_EngOn);
+      //Serial.print(" RE=");
+      //Serial.print(R_EngOn);
 
-      Serial.print(" time=");
-      Serial.println(timeMotor);
-      
+      //Serial.print(" time=");
+      //Serial.println(timeMotor);
       if(timeMotor > 500) {
         stopEngines();            
       } else {
-          delay(100);
-          timeMotor += 100;
+          delay(10);
+          timeMotor += 10;
       }      
     }
 
@@ -183,7 +182,10 @@ void startRightEngine() {
 
 void stopEngines() {  
   Serial.println("Stopping engine");
+  digitalWrite(IN1, LOW); 
   digitalWrite(IN2, LOW); 
+
+  digitalWrite(IN3, LOW); 
   digitalWrite(IN4, LOW); 
   
   analogWrite(ENA, 0);
@@ -192,5 +194,5 @@ void stopEngines() {
   L_EngOn = false;
   R_EngOn = false;
 
-  timeMotor = 0;
+  timeMotor = 1000;
 }
