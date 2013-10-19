@@ -1,8 +1,3 @@
-#include <Servo.h> 
- 
-Servo horizServo;  
-Servo vertServo;
-
 int ENA=9;
 int IN1=7;
 int IN2=8;
@@ -16,13 +11,13 @@ String inData = "";
 int horPoz = 0;    // variable to store the servo position 
 int vertPoz = 0;
 
-int L_EngOn = false;
-int R_EngOn = false;
+boolean L_EngOn = false;
+boolean R_EngOn = false;
 
-int L_EngFwd = true;
-int R_EngFwd = true;
+boolean L_EngFwd = true;
+boolean R_EngFwd = true;
 
-int motorSpeed = 0;
+unsigned int motorSpeed = 0;
 unsigned int timeMotor = 0;
 
 void setup() 
@@ -38,26 +33,17 @@ void setup()
 //  horizServo.attach(9);  // attaches the servo on pin 9 to the servo object 
 //  vertServo.attach(10);
   
-  Serial.begin(4800);
+  Serial.begin(19200);
 } 
  
  
 void loop() 
 {
     if(Serial.available()) {
-     while (Serial.available() > 0) {
       char recieved = Serial.read();    
+      Serial.print(recieved);
             
-      if (recieved == '*') {        
-        if(inData.startsWith("hcam")) {
-          horPoz =  inData.substring(4).toInt();
-          horizServo.write(horPoz);
-        }
-        if(inData.startsWith("vcam")) {
-          vertPoz =  inData.substring(4).toInt();
-          vertServo.write(vertPoz);
-        }
-
+      if (recieved == '\n') {        
         Serial.print("Received ");
         Serial.println(inData);
         
@@ -73,11 +59,12 @@ void loop()
         }
         
         if(inData.startsWith("rev_all_eng")) {
-          L_EngOn = true;
           L_EngFwd = false;
-          
-          R_EngOn = true;
           R_EngFwd = false;
+          
+          L_EngOn = true;          
+          R_EngOn = true;
+          
           
           timeMotor=0;
           motorSpeed =  inData.substring(11).toInt();
@@ -116,39 +103,63 @@ void loop()
         }
         
         inData = ""; //clear previous message
-        
+        Serial.flush();
       } else {
          inData += recieved;          
-      }  
-     }
+      }       
     }
     
     if(timeMotor == 0) {
-        if(L_EngOn) {
-          startLeftEngine();
-        } 
-        if(R_EngOn) {
-          startRightEngine();
-        } 
+        if(L_EngOn && R_EngOn) {
+          startAllEngine();
+        }
+        else {
+          if(L_EngOn) {
+            startLeftEngine();
+          }   
+          if(R_EngOn) {
+            startRightEngine();
+          } 
+        }
     }
 
     if(L_EngOn || R_EngOn) {
-      //Serial.print("LE=");
-      //Serial.print(L_EngOn);
+      Serial.print("LE=");
+      Serial.print(L_EngOn);
 
-      //Serial.print(" RE=");
-      //Serial.print(R_EngOn);
+      Serial.print(" RE=");
+      Serial.print(R_EngOn);
 
-      //Serial.print(" time=");
-      //Serial.println(timeMotor);
-      if(timeMotor > 500) {
+      Serial.print(" time=");
+      Serial.println(timeMotor);
+      if(timeMotor >= 500) {
         stopEngines();            
       } else {
-          delay(10);
-          timeMotor += 10;
+          Serial.println(timeMotor);
+          delay(100);
+          timeMotor += 100;
       }      
     }
+}
 
+void startAllEngine() {
+  Serial.println("Stopping ALL engines");
+  
+  if(L_EngFwd && R_EngFwd) {
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW); 
+
+    digitalWrite(IN3, HIGH);
+    digitalWrite(IN4, LOW);
+  } else {
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, HIGH);     
+    
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, HIGH);    
+  }
+  analogWrite(ENA, motorSpeed);
+  analogWrite(ENB, motorSpeed);
 }
 
 void startLeftEngine() {
@@ -163,6 +174,7 @@ void startLeftEngine() {
     digitalWrite(IN2, HIGH);     
   }
   analogWrite(ENA, motorSpeed);
+  Serial.println("started Left");
 }
 
 void startRightEngine() {
@@ -194,5 +206,6 @@ void stopEngines() {
   L_EngOn = false;
   R_EngOn = false;
 
-  timeMotor = 1000;
+  timeMotor = 1000;  
+  Serial.println("Stopped engine");
 }
