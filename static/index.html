@@ -7,7 +7,7 @@
     <title>Robot control</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
 
-    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery-2.0.3.min.js"></script>
     <script src="/js/jquery.knob.js"></script>
     <script src="/js/socket.io.js"></script>
 </head>
@@ -16,49 +16,54 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-md-offset-2 col-md-2" >
-            <a id="forward" href="#" class="btn btn-lg btn-danger">
-                <span class="glyphicon glyphicon-circle-arrow-up"></span>
-                Forward
-            </a>
+        <div class="col-md-6 col-lg-6 col-sm-12" style="padding: 50px;"></div>
         </div>
-    </div>
-
     <div class="row">
-        <div class="col-md-2">
-            <a id="left" href="#" class="btn btn-lg btn-info">
-                <span class="glyphicon glyphicon-circle-arrow-left"></span>
-                Left
-            </a>
-        </div>
+        <div class="col-md-6 col-lg-6 col-sm-12">
+            <div class="row">
+                <div class="col-xs-12" style="text-align: center">
+                    <a id="forward" href="#" class="btn btn-lg btn-danger">
+                        <span class="glyphicon glyphicon-circle-arrow-up"></span>
+                        Forward
+                    </a>
+                </div>
+            </div>
 
-        <div class="col-md-offset-4 col-md-2">
-            <a id="right" href="#" class="btn btn-lg btn-info">
-                <span class="glyphicon glyphicon-circle-arrow-right"></span>
-                Right
-            </a>
+            <div class="row">
+                <div class="col-xs-6">
+                    <a id="left" href="#" class="btn btn-lg btn-info">
+                        <span class="glyphicon glyphicon-circle-arrow-left"></span>
+                        Left
+                    </a>
+                </div>
+
+                <div class="col-xs-6">
+                    <a id="right" href="#" class="btn btn-lg btn-info pull-right">
+                        <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                        Right
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12" style="text-align: center">
+                    <a id="back" href="#" class="btn btn-lg btn-danger">
+                        <span class="glyphicon glyphicon-circle-arrow-down"></span>
+                        Back !
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-lg-6">
+            <input id="speed" type="text" value="0" class="dial" style="margin-top: 50px;">
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-offset-2 col-md-2">
-            <a id="back" href="#" class="btn btn-lg btn-danger">
-                <span class="glyphicon glyphicon-circle-arrow-down"></span>
-                Back
-            </a>
-        </div>
-    </div>
-
-    <div class="row" style="margin-top: 50px;">
-        <div class="col-md-1">
-            <input id="speed" type="text" value="0" class="dial">
-        </div>
-    </div>
 
 </div>
 
 <script>
-    var socket = io.connect('ws://192.168.0.15:8000');
+    var socket = io.connect('ws://10.0.0.1:8000');
     var speedKnob = $("#speed");
     speedKnob.knob({
         min : 0,
@@ -68,24 +73,61 @@
             console.log(value);
         }
     });
+    var btnFwd = $("#forward"),
+        btnBack = $("#back"),
+        btnLeft = $("#left"),
+        btnRight = $("#right");
 
-    $("#forward").on("click", function(ev) {
-        ev.preventDefault();
+    var timeoutId = 0;
 
+    function allEngineSend() {
         socket.emit('all_engine', { val : speedKnob.val()});
-    });
-    $("#left").on("click", function(ev) {
-        ev.preventDefault();
-        socket.emit('lengine', { val : speedKnob.val()});
-    });
-    $("#right").on("click", function(ev) {
-        ev.preventDefault();
-        socket.emit('rengine', { val : speedKnob.val()});
-    });
-    $("#back").on("click", function(ev) {
-        ev.preventDefault();
+    }
+    function revAllEngineSend() {
         socket.emit('rev_all_engine', { val : speedKnob.val()});
-    });
+    }
+    function rightEngineSend() {
+        socket.emit('rengine', { val : speedKnob.val()});
+    }
+    function leftEngineSend() {
+        socket.emit('lengine', { val : speedKnob.val()});
+    }
+    function registerTimeout(motorCommand) {
+        clearTimeout(timeoutId);
+
+        timeoutId = setTimeout(function() {
+            motorCommand();
+            timeoutId = registerTimeout(motorCommand);
+        }, 400);
+        return timeoutId;
+    }
+    function registerEndXEvent(btn) {
+        btn.on("touchend touchmove touchleave touchcancel mouseup", function(ev) {
+            ev.preventDefault();
+            clearTimeout(timeoutId);
+        });
+    }
+
+    function registerStartXEvent(btn, motorAction) {
+        btn.on("touchstart mousedown", function(ev) {
+            ev.preventDefault();
+
+            motorAction();
+            registerTimeout(function() {
+                motorAction();
+            })
+        });
+    }
+
+    registerStartXEvent(btnFwd, function() { allEngineSend() });
+    registerStartXEvent(btnLeft, function() { leftEngineSend() });
+    registerStartXEvent(btnRight, function() { rightEngineSend() });
+    registerStartXEvent(btnBack, function() { revAllEngineSend() });
+
+    registerEndXEvent(btnFwd);
+    registerEndXEvent(btnLeft);
+    registerEndXEvent(btnRight);
+    registerEndXEvent(btnBack);
 
 </script>
 

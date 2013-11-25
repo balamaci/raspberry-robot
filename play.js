@@ -14,6 +14,7 @@
         isWatching = false,
         baseSpeed = 180; //the base speed from which the motors start up
 
+/*
     var arduinoSerial = new SerialPort("/dev/ttyACM0", {
         baudrate: 4800
     });
@@ -24,6 +25,7 @@
             console.log('data received: ' + data);
         });
     });
+*/
 
     app.use(express.static(path.join(__dirname, 'static')));
 
@@ -39,7 +41,7 @@
         console.log('Connected');
 
         socket.on('lengine', function (data) {
-            var command = "leng"+ getArduinoSpeed(data.val) + "*";
+            var command = "leng"+ getArduinoSpeed(data.val) + "\n";
             console.log('LeftEngine ' + command);
 
             arduinoSerial.write(command, function(err, results) {
@@ -49,7 +51,7 @@
         });
 
         socket.on('rengine', function (data) {
-            var command = "reng" + getArduinoSpeed(data.val) + "*";
+            var command = "reng" + getArduinoSpeed(data.val) + "\n";
             console.log('RightEngine: ' + command);
 
             arduinoSerial.write(command, function(err, results) {
@@ -59,7 +61,7 @@
         });
 
         socket.on('all_engine', function (data) {
-            var command = "all_eng" + getArduinoSpeed(data.val) + "*";
+            var command = "all_eng" + getArduinoSpeed(data.val) + "\n";
             console.log('AllEngine: ' + command);
 
             arduinoSerial.write(command, function(err, results) {
@@ -69,7 +71,7 @@
         });
 
         socket.on('rev_all_engine', function (data) {
-            var command = "rev_all_eng" + getArduinoSpeed(data.val) + "*";
+            var command = "rev_all_eng" + getArduinoSpeed(data.val) + "\n";
             console.log('ReverseEngine: ' + command);
 
             arduinoSerial.write(command, function(err, results) {
