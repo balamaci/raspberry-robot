@@ -10,75 +10,224 @@
     <script src="/js/jquery-2.0.3.min.js"></script>
     <script src="/js/jquery.knob.js"></script>
     <script src="/js/socket.io.js"></script>
+    <script src="/js/delivery.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/hammer.min.js"></script>
 </head>
 
 <body id="home">
 
 <div class="container">
-    <div class="row">
-        <div class="col-md-6 col-lg-6 col-sm-12" style="padding: 50px;"></div>
-        </div>
-    <div class="row">
-        <div class="col-md-6 col-lg-6 col-sm-12">
-            <div class="row">
-                <div class="col-xs-12" style="text-align: center">
-                    <a id="forward" href="#" class="btn btn-lg btn-danger">
-                        <span class="glyphicon glyphicon-circle-arrow-up"></span>
-                        Forward
-                    </a>
+<div id="toucharea">
+    <div class="carousel slide" id="carousel" data-ride="carousel">
+        <div class="carousel-inner">
+            <div class="item active">
+                <div class="panel panel-default" id="smooth-controls">
+                    <div class="panel-heading">Smooth Controls</div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-6 col-lg-6 col-xs-12">
+                                <div class="row">
+                                    <div class="col-xs-12" style="text-align: center">
+                                        <a id="forward" href="#" class="btn btn-lg btn-danger">
+                                            <span class="glyphicon glyphicon-circle-arrow-up"></span>
+                                            Forward
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <a id="left" href="#" class="btn btn-lg btn-info">
+                                            <span class="glyphicon glyphicon-circle-arrow-left"></span>
+                                            Left
+                                        </a>
+                                    </div>
+
+                                    <div class="col-xs-6">
+                                        <a id="right" href="#" class="btn btn-lg btn-info pull-right">
+                                            <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                                            Right
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-xs-12" style="text-align: center">
+                                        <a id="back" href="#" class="btn btn-lg btn-danger">
+                                            <span class="glyphicon glyphicon-circle-arrow-down"></span>
+                                            Back !
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-lg-6" style="text-align: center">
+                                <input id="speed" type="text" value="0" class="dial" style="margin-top: 50px;">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <a id="camera-start" href="#" class="btn btn-info">
+                                    <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                                    Camera
+                                </a>
+                            </div>
+                            <div class="col-xs-12 col-lg-6">
+                                <img id="camera" src=""/>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-xs-6">
-                    <a id="left" href="#" class="btn btn-lg btn-info">
-                        <span class="glyphicon glyphicon-circle-arrow-left"></span>
-                        Left
-                    </a>
-                </div>
+            <div class="item">
+                <div class="panel panel-default" id="path-nav">
+                    <div class="panel-heading">Navigation Controls</div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-xs-8 col-md-6">
+                                <div class="row">
+                                    <div class="col-xs-12" style="text-align: center">
+                                        <a id="fwd" href="#" class="btn btn-lg btn-default path-btn">
+                                            <span class="glyphicon glyphicon-circle-arrow-up"></span>
+                                            Forward
+                                        </a>
+                                    </div>
+                                </div>
 
-                <div class="col-xs-6">
-                    <a id="right" href="#" class="btn btn-lg btn-info pull-right">
-                        <span class="glyphicon glyphicon-circle-arrow-right"></span>
-                        Right
-                    </a>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <a id="lft" href="#" class="btn btn-lg btn-default path-btn">
+                                            <span class="glyphicon glyphicon-circle-arrow-left"></span>
+                                            Left
+                                        </a>
+                                    </div>
+
+                                    <div class="col-xs-6">
+                                        <a id="rgt" href="#" class="btn btn-lg btn-default pull-right path-btn">
+                                            <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                                            Right
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-xs-12" style="text-align: center">
+                                        <a id="bck" href="#" class="btn btn-lg btn-default path-btn">
+                                            <span class="glyphicon glyphicon-circle-arrow-down"></span>
+                                            Back !
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-xs-8 col-md-6">
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <ul class="list-group">
+                                            <li class="list-group-item">
+                                                <span class="badge">14</span>
+                                                Cras justo odio
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <a id="path-exec" href="#" class="btn btn-lg btn-default">
+                                            <span class="glyphicon glyphicon-circle-arrow-down"></span>
+                                            Execute!
+                                        </a>
+                                    </div>
+                                </div>
+                        </div>
+                            </div>
+
+                        <div class="row" style="padding-top: 50px;">
+                            <div class="col-xs-2">
+                                <input type="number" class="form-control" name="path_val"/>
+                            </div>
+
+                            <div class="col-xs-3" id="dst-measurement-panel">
+                                <a id="meter" href="#" class="btn btn-default dst-measurement">
+                                    <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                                    M
+                                </a>
+                                <a id="cm" href="#" class="btn btn-default dst-measurement">
+                                    <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                                    cm
+                                </a>
+                            </div>
+                            <div class="col-xs-2" id="deg-measurement-panel" style="display: none;">
+                                <a id="deg" href="#" class="btn btn-default deg-measurement">
+                                    <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                                    deg
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top: 40px;">
+                            <div class="col-xs-4">
+                                <a id="add-path" href="#" class="btn btn-default">
+                                    <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                                    ADD
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="row">
-                <div class="col-xs-12" style="text-align: center">
-                    <a id="back" href="#" class="btn btn-lg btn-danger">
-                        <span class="glyphicon glyphicon-circle-arrow-down"></span>
-                        Back !
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-xs-12 col-lg-6">
-            <input id="speed" type="text" value="0" class="dial" style="margin-top: 50px;">
         </div>
     </div>
-
-
 </div>
 
 <script>
-    var socket = io.connect('ws://10.0.0.1:8000');
+    var socket = io.connect('ws://192.168.0.30:8000');
     var speedKnob = $("#speed");
     speedKnob.knob({
         min : 0,
         max : 6,
         'skin':"tron",
+        displayInput : false,
         'change' : function (value) {
             console.log(value);
         }
     });
-    var btnFwd = $("#forward"),
-        btnBack = $("#back"),
-        btnLeft = $("#left"),
-        btnRight = $("#right");
+    var smoothControlsPanel = $('#smooth-controls'),
+        navPathPanel = $('#path-nav'),
+        carousel = $('#carousel');
 
-    var timeoutId = 0;
+    var position = smoothControlsPanel.position();
+    var hammertime = Hammer(document.getElementById("toucharea"));
+
+    var btnFwd = document.getElementById('forward'),
+        btnBack = document.getElementById('back'),
+        btnLeft = document.getElementById('left'),
+        btnRight = document.getElementById('right'),
+
+        pathFwd = document.getElementById('fwd'),
+        pathBack = document.getElementById('bck'),
+        pathLeft = document.getElementById('lft'),
+        pathRight = document.getElementById('rgt'),
+
+        btnCm = $('#cm'),
+        btnM = $('#meter'),
+        btnDeg = $('#deg');
+
+
+    var timeoutId = 0,
+        delivery;
+
+    carousel.carousel('pause');
+
+    socket.on('connect', function() {
+        delivery = new Delivery(socket);
+        delivery.on('receive.success',function(file){
+            if (file.isImage()) {
+                $('#camera').attr('src', file.dataURL());
+            }
+        });
+    });
 
     function allEngineSend() {
         socket.emit('all_engine', { val : speedKnob.val()});
@@ -102,14 +251,16 @@
         return timeoutId;
     }
     function registerEndXEvent(btn) {
-        btn.on("touchend touchmove touchleave touchcancel mouseup", function(ev) {
+        var hammertimeBtn = Hammer(btn);
+        hammertimeBtn.on("release", function(ev) {
             ev.preventDefault();
             clearTimeout(timeoutId);
         });
     }
 
     function registerStartXEvent(btn, motorAction) {
-        btn.on("touchstart mousedown", function(ev) {
+        var hammertimeBtn = Hammer(btn);
+        hammertimeBtn.on("touch", function(ev) {
             ev.preventDefault();
 
             motorAction();
@@ -117,6 +268,59 @@
                 motorAction();
             })
         });
+    }
+
+    function makePathBtnActive(btn) {
+        var hammertimeBtn = Hammer(btn);
+        hammertimeBtn.on("tap", function(ev) {
+            ev.preventDefault();
+
+            $('.active .path-btn').each(function () {
+                $(this).removeClass('active');
+                $(this).removeClass('btn-primary');
+                $(this).addClass('btn-default');
+            });
+
+            $('.dst-measurement').removeClass('active');
+            $('.deg-measurement').removeClass('active');
+
+            $(btn).addClass('active');
+            $(btn).removeClass('btn-default');
+            $(btn).addClass('btn-primary');
+
+            var id = btn.getAttribute('id');
+
+            if(id === 'fwd' || id==='bck') {
+                $('#dst-measurement-panel').show();
+                $('#deg-measurement-panel').hide();
+
+                btnCm.removeClass('active');
+                if(! btnM.hasClass('active')) {
+                    console.log('Seting active');
+
+                    btnM.addClass('active');
+                }
+
+                btnDeg.removeClass('active');
+            }
+
+            if(id === 'lft' || id==='rgt') {
+                $('#dst-measurement-panel').hide();
+                $('#deg-measurement-panel').show();
+
+                btnCm.removeClass('active');
+                btnM.removeClass('active');
+
+                btnDeg.addClass('active');
+            }
+        });
+    }
+
+    function registerPathBtns() {
+        makePathBtnActive(pathFwd);
+        makePathBtnActive(pathBack);
+        makePathBtnActive(pathLeft);
+        makePathBtnActive(pathRight);
     }
 
     registerStartXEvent(btnFwd, function() { allEngineSend() });
@@ -128,6 +332,34 @@
     registerEndXEvent(btnLeft);
     registerEndXEvent(btnRight);
     registerEndXEvent(btnBack);
+
+    registerPathBtns();
+
+    $('#camera-start').on('click', function (ev) {
+        ev.preventDefault();
+        console.log('Sending watch');
+        socket.emit('watch');
+    });
+
+    hammertime.on("swipeleft", function(ev) {
+        carousel.carousel('next');
+        carousel.carousel('pause');
+    });
+
+    hammertime.on("swiperight", function(ev) {
+        carousel.carousel('prev');
+        carousel.carousel('pause');
+    });
+
+    carousel.on('slide.bs.carousel', function () {
+        smoothControlsPanel.css('opacity', '0.6');
+        navPathPanel.css('opacity', '0.6');
+    });
+
+    carousel.on('slid.bs.carousel', function () {
+        smoothControlsPanel.css('opacity', '1');
+        navPathPanel.css('opacity', '1');
+    });
 
 </script>
 
