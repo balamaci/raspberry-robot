@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="robotApp">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
@@ -13,12 +13,25 @@
     <script src="/js/delivery.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/hammer.min.js"></script>
+    <script src="/js/underscore.min.js"></script>
+
+    <!--<script src="/js/angular-1.2.3.min.js"></script>-->
+
+    <script id="path-actions-template" type="text/template">
+        <% _.each(actions,function(action, key){ %>
+        <a href="#" class="list-group-item" data-id="<%=key%>">
+            <span class="badge"><%=action.unit %></span>
+            <span class="badge"><%=action.value %></span>
+            <%=action.displayName() %>
+        </a>
+        <% }) %>
+    </script>
+
 </head>
 
 <body id="home">
 
-<div class="container">
-<div id="toucharea">
+<div class="container" id="toucharea">
     <div class="carousel slide" id="carousel" data-ride="carousel">
         <div class="carousel-inner">
             <div class="item active">
@@ -125,19 +138,26 @@
                             <div class="col-xs-8 col-md-6">
                                 <div class="row">
                                     <div class="col-xs-12">
-                                        <ul class="list-group">
-                                            <li class="list-group-item">
-                                                <span class="badge">14</span>
-                                                Cras justo odio
-                                            </li>
-                                        </ul>
+                                        <div class="list-group" id="path-actions"></div>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-xs-12">
-                                        <a id="path-exec" href="#" class="btn btn-lg btn-default">
-                                            <span class="glyphicon glyphicon-circle-arrow-down"></span>
+                                    <div class="col-xs-3">
+                                        <a id="path-exec" href="#" class="btn btn-default">
+                                            <span class="glyphicon glyphicon-play-circle"></span>
                                             Execute!
+                                        </a>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <a id="path-del-item" href="#" class="btn btn-default">
+                                            <span class="glyphicon glyphicon-minus-sign"></span>
+                                            Delete
+                                        </a>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <a id="path-del-all" href="#" class="btn btn-danger">
+                                            <span class="glyphicon glyphicon-minus-sign"></span>
+                                            Delete All
                                         </a>
                                     </div>
                                 </div>
@@ -146,21 +166,21 @@
 
                         <div class="row" style="padding-top: 50px;">
                             <div class="col-xs-2">
-                                <input type="number" class="form-control" name="path_val"/>
+                                <input id="path-unit-value" type="number" class="form-control" name="path-unit-value"/>
                             </div>
 
                             <div class="col-xs-3" id="dst-measurement-panel">
-                                <a id="meter" href="#" class="btn btn-default dst-measurement">
+                                <a id="meter" href="#" class="btn btn-default units dst-measurement">
                                     <span class="glyphicon glyphicon-circle-arrow-right"></span>
                                     M
                                 </a>
-                                <a id="cm" href="#" class="btn btn-default dst-measurement">
+                                <a id="cm" href="#" class="btn btn-default units dst-measurement">
                                     <span class="glyphicon glyphicon-circle-arrow-right"></span>
                                     cm
                                 </a>
                             </div>
                             <div class="col-xs-2" id="deg-measurement-panel" style="display: none;">
-                                <a id="deg" href="#" class="btn btn-default deg-measurement">
+                                <a id="deg" href="#" class="btn btn-default units deg-measurement">
                                     <span class="glyphicon glyphicon-circle-arrow-right"></span>
                                     deg
                                 </a>
@@ -169,7 +189,7 @@
                         <div class="row" style="padding-top: 40px;">
                             <div class="col-xs-4">
                                 <a id="add-path" href="#" class="btn btn-default">
-                                    <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                                    <span class="glyphicon glyphicon-floppy-open"></span>
                                     ADD
                                 </a>
                             </div>
@@ -181,44 +201,16 @@
     </div>
 </div>
 
+<script src="/js/custom/nav.js"></script>
+<script src="/js/custom/smooth.js"></script>
+<script src="/js/custom/path.js"></script>
+
 <script>
     var socket = io.connect('ws://192.168.0.30:8000');
-    var speedKnob = $("#speed");
-    speedKnob.knob({
-        min : 0,
-        max : 6,
-        'skin':"tron",
-        displayInput : false,
-        'change' : function (value) {
-            console.log(value);
-        }
-    });
-    var smoothControlsPanel = $('#smooth-controls'),
-        navPathPanel = $('#path-nav'),
-        carousel = $('#carousel');
-
-    var position = smoothControlsPanel.position();
-    var hammertime = Hammer(document.getElementById("toucharea"));
-
-    var btnFwd = document.getElementById('forward'),
-        btnBack = document.getElementById('back'),
-        btnLeft = document.getElementById('left'),
-        btnRight = document.getElementById('right'),
-
-        pathFwd = document.getElementById('fwd'),
-        pathBack = document.getElementById('bck'),
-        pathLeft = document.getElementById('lft'),
-        pathRight = document.getElementById('rgt'),
-
-        btnCm = $('#cm'),
-        btnM = $('#meter'),
-        btnDeg = $('#deg');
-
 
     var timeoutId = 0,
         delivery;
 
-    carousel.carousel('pause');
 
     socket.on('connect', function() {
         delivery = new Delivery(socket);
@@ -250,90 +242,7 @@
         }, 400);
         return timeoutId;
     }
-    function registerEndXEvent(btn) {
-        var hammertimeBtn = Hammer(btn);
-        hammertimeBtn.on("release", function(ev) {
-            ev.preventDefault();
-            clearTimeout(timeoutId);
-        });
-    }
 
-    function registerStartXEvent(btn, motorAction) {
-        var hammertimeBtn = Hammer(btn);
-        hammertimeBtn.on("touch", function(ev) {
-            ev.preventDefault();
-
-            motorAction();
-            registerTimeout(function() {
-                motorAction();
-            })
-        });
-    }
-
-    function makePathBtnActive(btn) {
-        var hammertimeBtn = Hammer(btn);
-        hammertimeBtn.on("tap", function(ev) {
-            ev.preventDefault();
-
-            $('.active .path-btn').each(function () {
-                $(this).removeClass('active');
-                $(this).removeClass('btn-primary');
-                $(this).addClass('btn-default');
-            });
-
-            $('.dst-measurement').removeClass('active');
-            $('.deg-measurement').removeClass('active');
-
-            $(btn).addClass('active');
-            $(btn).removeClass('btn-default');
-            $(btn).addClass('btn-primary');
-
-            var id = btn.getAttribute('id');
-
-            if(id === 'fwd' || id==='bck') {
-                $('#dst-measurement-panel').show();
-                $('#deg-measurement-panel').hide();
-
-                btnCm.removeClass('active');
-                if(! btnM.hasClass('active')) {
-                    console.log('Seting active');
-
-                    btnM.addClass('active');
-                }
-
-                btnDeg.removeClass('active');
-            }
-
-            if(id === 'lft' || id==='rgt') {
-                $('#dst-measurement-panel').hide();
-                $('#deg-measurement-panel').show();
-
-                btnCm.removeClass('active');
-                btnM.removeClass('active');
-
-                btnDeg.addClass('active');
-            }
-        });
-    }
-
-    function registerPathBtns() {
-        makePathBtnActive(pathFwd);
-        makePathBtnActive(pathBack);
-        makePathBtnActive(pathLeft);
-        makePathBtnActive(pathRight);
-    }
-
-    registerStartXEvent(btnFwd, function() { allEngineSend() });
-    registerStartXEvent(btnLeft, function() { leftEngineSend() });
-    registerStartXEvent(btnRight, function() { rightEngineSend() });
-    registerStartXEvent(btnBack, function() { revAllEngineSend() });
-
-    registerEndXEvent(btnFwd);
-    registerEndXEvent(btnLeft);
-    registerEndXEvent(btnRight);
-    registerEndXEvent(btnBack);
-
-    registerPathBtns();
 
     $('#camera-start').on('click', function (ev) {
         ev.preventDefault();
@@ -341,25 +250,10 @@
         socket.emit('watch');
     });
 
-    hammertime.on("swipeleft", function(ev) {
-        carousel.carousel('next');
-        carousel.carousel('pause');
-    });
 
-    hammertime.on("swiperight", function(ev) {
-        carousel.carousel('prev');
-        carousel.carousel('pause');
-    });
-
-    carousel.on('slide.bs.carousel', function () {
-        smoothControlsPanel.css('opacity', '0.6');
-        navPathPanel.css('opacity', '0.6');
-    });
-
-    carousel.on('slid.bs.carousel', function () {
-        smoothControlsPanel.css('opacity', '1');
-        navPathPanel.css('opacity', '1');
-    });
+    RBOT.nav.init();
+    RBOT.smooth.init();
+    RBOT.path.init();
 
 </script>
 
