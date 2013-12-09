@@ -99,7 +99,7 @@
                     <div class="panel-heading">Navigation Controls</div>
                     <div class="panel-body">
                         <div class="row">
-                            <div class="col-xs-8 col-md-6">
+                            <div class="col-xs-6 col-md-6">
                                 <div class="row">
                                     <div class="col-xs-12" style="text-align: center">
                                         <a id="fwd" href="#" class="btn btn-lg btn-default path-btn">
@@ -133,67 +133,77 @@
                                         </a>
                                     </div>
                                 </div>
+
+                                <div class="row" style="padding-top: 30px;">
+                                    <div class="col-xs-2">
+                                        <input id="path-unit-value" type="number" class="form-control" name="path-unit-value"/>
+                                    </div>
+
+                                    <div class="col-xs-5" id="dst-measurement-panel">
+                                        <a id="meter" href="#" class="btn btn-default units dst-measurement">
+                                            <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                                            M
+                                        </a>
+                                        <a id="cm" href="#" class="btn btn-default units dst-measurement">
+                                            <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                                            cm
+                                        </a>
+                                    </div>
+                                    <div class="col-xs-5" id="deg-measurement-panel" style="display: none;">
+                                        <a id="deg" href="#" class="btn btn-default units deg-measurement">
+                                            <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                                            deg
+                                        </a>
+                                    </div>
+                                    <div class="col-xs-5 btn-group">
+                                        <a id="add-path" href="#" class="btn btn-default">
+                                            <span class="glyphicon glyphicon-floppy-open"></span>
+                                            ADD
+                                        </a>
+                                        <a id="add-path-before" href="#" class="btn btn-default">
+                                            <span class="glyphicon glyphicon-cloud-upload"></span>
+                                            ADD Before
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="padding-top: 40px;">
+                                    <div class="col-xs-12">
+                                        <table class="table table-condensed">
+                                            <thead><th>Executed actions</th></thead>
+                                            <tbody id="executed-actions">
+                                                <tr></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
                             </div>
 
-                            <div class="col-xs-8 col-md-6">
+                            <div class="col-xs-6 col-md-6">
                                 <div class="row">
                                     <div class="col-xs-12">
                                         <div class="list-group" id="path-actions"></div>
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-xs-3">
+                                    <div class="col-xs-12 btn-group">
                                         <a id="path-exec" href="#" class="btn btn-default">
                                             <span class="glyphicon glyphicon-play-circle"></span>
                                             Execute!
                                         </a>
-                                    </div>
-                                    <div class="col-xs-3">
                                         <a id="path-del-item" href="#" class="btn btn-default">
                                             <span class="glyphicon glyphicon-minus-sign"></span>
                                             Delete
                                         </a>
-                                    </div>
-                                    <div class="col-xs-3">
                                         <a id="path-del-all" href="#" class="btn btn-danger">
                                             <span class="glyphicon glyphicon-minus-sign"></span>
                                             Delete All
                                         </a>
                                     </div>
                                 </div>
-                        </div>
                             </div>
-
-                        <div class="row" style="padding-top: 50px;">
-                            <div class="col-xs-2">
-                                <input id="path-unit-value" type="number" class="form-control" name="path-unit-value"/>
                             </div>
-
-                            <div class="col-xs-3" id="dst-measurement-panel">
-                                <a id="meter" href="#" class="btn btn-default units dst-measurement">
-                                    <span class="glyphicon glyphicon-circle-arrow-right"></span>
-                                    M
-                                </a>
-                                <a id="cm" href="#" class="btn btn-default units dst-measurement">
-                                    <span class="glyphicon glyphicon-circle-arrow-right"></span>
-                                    cm
-                                </a>
-                            </div>
-                            <div class="col-xs-2" id="deg-measurement-panel" style="display: none;">
-                                <a id="deg" href="#" class="btn btn-default units deg-measurement">
-                                    <span class="glyphicon glyphicon-circle-arrow-right"></span>
-                                    deg
-                                </a>
-                            </div>
-                        </div>
-                        <div class="row" style="padding-top: 40px;">
-                            <div class="col-xs-4">
-                                <a id="add-path" href="#" class="btn btn-default">
-                                    <span class="glyphicon glyphicon-floppy-open"></span>
-                                    ADD
-                                </a>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -211,6 +221,10 @@
     var timeoutId = 0,
         delivery;
 
+
+    RBOT.nav.init();
+    RBOT.smooth.init();
+    RBOT.path.init();
 
     socket.on('connect', function() {
         delivery = new Delivery(socket);
@@ -233,16 +247,9 @@
     function leftEngineSend() {
         socket.emit('lengine', { val : speedKnob.val()});
     }
-    function registerTimeout(motorCommand) {
-        clearTimeout(timeoutId);
-
-        timeoutId = setTimeout(function() {
-            motorCommand();
-            timeoutId = registerTimeout(motorCommand);
-        }, 400);
-        return timeoutId;
+    function sendExecutePathActions(actions) {
+        socket.emit('exec_actions', { actions : actions });
     }
-
 
     $('#camera-start').on('click', function (ev) {
         ev.preventDefault();
@@ -250,10 +257,6 @@
         socket.emit('watch');
     });
 
-
-    RBOT.nav.init();
-    RBOT.smooth.init();
-    RBOT.path.init();
 
 </script>
 

@@ -10,9 +10,14 @@ var RBOT = RBOT || {}
 
         btnCm = $('#cm'),
         btnM = $('#meter'),
-        btnDeg = $('#deg');
+        btnDeg = $('#deg'),
 
-    var btnPathAdd = $('#add-path');
+        executedActionsTable = $('#executed-actions');
+
+    var socket;
+
+    var btnPathAdd = $('#add-path'),
+        btnPathAddBefore = $('#add-path-before');
 
     var templatePathActions = $('#path-actions-template').html();
 
@@ -77,6 +82,10 @@ var RBOT = RBOT || {}
         });
     }
 
+    function getSelectedEntryPoz() {
+        return $("#path-actions").find(".list-group-item.active").data('id');
+    }
+
     function registerPathBtns() {
         makePathBtnActive(pathFwd);
         makePathBtnActive(pathBack);
@@ -98,12 +107,21 @@ var RBOT = RBOT || {}
 
         var hammAdd = Hammer(btnPathAdd.get(0));
         hammAdd.on('tap', function(ev) {
-            var direction = $(".active.path-btn").attr('id');
+            addPathAction();
+        });
 
-            var unit = $(".active.units").attr('id');
-            var unitValue = $('#path-unit-value').val();
+        var hammAddBefore = Hammer(btnPathAddBefore.get(0));
+        hammAddBefore.on('tap', function(ev) {
+            var poz = getSelectedEntryPoz();
 
-            addPathAction(direction, unitValue, unit);
+            addPathAction(poz);
+        });
+
+        $('#path-exec').click(function(ev) {
+            ev.preventDefault();
+            var actions = getPathActions();
+
+            sendExecutePathActions(actions);
         });
 
         $('#path-del-all').click(function(ev) {
@@ -113,11 +131,14 @@ var RBOT = RBOT || {}
             renderPathItems();
         });
 
+
+
         $('#path-del-item').click(function(ev) {
             ev.preventDefault();
-            var poz = $("#path-actions").find(".list-group-item.active").data('id');
 
             var actions = getPathActions();
+            var poz = getSelectedEntryPoz();
+
             actions.splice(poz, 1);
             persistActions(actions);
 
@@ -159,19 +180,39 @@ var RBOT = RBOT || {}
         localStorage.setItem("actions", JSON.stringify(actions));
     }
 
-    function addPathAction(direction, unitValue, unit, poz) {
-        var actions = getPathActions();
-        if(poz) {
+    function newAction() {
+        var direction = $(".active.path-btn").attr('id');
+        var unit = $(".active.units").attr('id');
+        var unitValue = $('#path-unit-value').val();
 
+        return new Action(direction, unitValue, unit);
+    }
+
+    function addPathAction(poz) {
+        var actions = getPathActions();
+        var action = newAction();
+        if(poz) {
+            actions.splice(poz, 0, action);
         } else {
-            actions.push(new Action(direction, unitValue, unit));
+            actions.push(action);
         }
 
         persistActions(actions);
         renderPathItems();
     }
 
-    function init() {
+    function addExecutedPathAction(actionStr) {
+        var entries = executedActionsTable.children('tr').length;
+        if(entries > 5) {
+            executedActionsTable.find('tr:first').remove();
+        }
+
+        executedActionsTable.append('<tr><td>' + actionStr + '</td></tr>');
+    }
+
+    function init(socket) {
+        this.socket = socket;
+
         registerPathBtns();
         renderPathItems();
         registerPathListEntriesWatcher();
