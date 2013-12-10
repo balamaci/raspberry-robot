@@ -187,11 +187,13 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-xs-12 btn-group">
+                                    <div class="col-xs-6 col-md-6 btn-group">
                                         <a id="path-exec" href="#" class="btn btn-default">
                                             <span class="glyphicon glyphicon-play-circle"></span>
                                             Execute!
                                         </a>
+                                    </div>
+                                    <div class="col-xs-6 col-md-6 btn-group">
                                         <a id="path-del-item" href="#" class="btn btn-default">
                                             <span class="glyphicon glyphicon-minus-sign"></span>
                                             Delete
@@ -216,7 +218,18 @@
 <script src="/js/custom/path.js"></script>
 
 <script>
-    var socket = io.connect('ws://192.168.0.30:8000');
+    var socket = io.connect('ws://localhost:8000');
+
+    var speedKnob = $("#speed");
+    speedKnob.knob({
+        min : 0,
+        max : 6,
+        'skin':"tron",
+        displayInput : false,
+        'change' : function (value) {
+            console.log(value);
+        }
+    });
 
     var timeoutId = 0,
         delivery;
@@ -235,6 +248,10 @@
         });
     });
 
+    socket.on('executed', function(data) {
+        RBOT.path.addExecutedPathAction(data.action);
+    });
+
     function allEngineSend() {
         socket.emit('all_engine', { val : speedKnob.val()});
     }
@@ -247,8 +264,9 @@
     function leftEngineSend() {
         socket.emit('lengine', { val : speedKnob.val()});
     }
-    function sendExecutePathActions(actions) {
-        socket.emit('exec_actions', { actions : actions });
+    function sendExecutePathActions() {
+        var jsonActions = localStorage.getItem("actions");
+        socket.emit('exec_actions', { actions : jsonActions });
     }
 
     $('#camera-start').on('click', function (ev) {

@@ -17,9 +17,11 @@ volatile boolean R_EngOn = false;
 volatile boolean L_EngFwd = true;
 volatile boolean R_EngFwd = true;
 
+volatile boolean stopCommanded = false;
+
 volatile unsigned int motorSpeed = 0;
-volatile unsigned int timeLeftMotor = 0;
-volatile unsigned int timeRightMotor = 0;
+volatile unsigned int timeMotor = 0;
+//volatile unsigned int timeRightMotor = 0;
 
 volatile unsigned int timeToRun = 1500;
 
@@ -44,16 +46,17 @@ void setup()
 void loop() 
 {
   if(Serial.available()) {
-    char recieved = Serial.read();    
-    Serial.print(recieved);
+    char recieved = Serial.read();
 
     if (recieved == '\n') {        
-      Serial.print("Received ");
-      Serial.println(inData);
+//      Serial.print("Received ");
+//      Serial.println(inData);
 
       stopCommanded = false;
       timeToRun = 1500;
 
+      timeMotor=0;
+      
       if(inData.startsWith("stop")) {
          stopCommanded = true;
       }
@@ -65,11 +68,9 @@ void loop()
         R_EngOn = true;
         R_EngFwd = true;
 
-        timeRightMotor=0;
-        timeLeftMotor=0;
         motorSpeed =  inData.substring(7, 10).toInt();
         if(inData.length() > 11) {
-            timeToRun = inData.substring(11);
+            timeToRun = inData.substring(11).toInt();
         }
       }
 
@@ -79,14 +80,11 @@ void loop()
 
         L_EngOn = true;          
         R_EngOn = true;
-
-
-        timeRightMotor=0;
-        timeLeftMotor=0;
+        
 
         motorSpeed =  inData.substring(11, 14).toInt();
         if(inData.length() > 15) {
-            timeToRun = inData.substring(15);
+            timeToRun = inData.substring(15).toInt();
         }
       }
 
@@ -94,12 +92,9 @@ void loop()
         R_EngOn = true;
         R_EngFwd = true;
 
-        timeRightMotor=0;
-        timeLeftMotor=0;
-
         motorSpeed =  inData.substring(4, 7).toInt();
         if(inData.length() > 8) {
-            timeToRun = inData.substring(8);
+            timeToRun = inData.substring(8).toInt();
         }
       }
 
@@ -107,31 +102,35 @@ void loop()
         R_EngOn = true;
         R_EngFwd = false;
 
-        timeRightMotor=0;
-        timeLeftMotor=0;
-
-        motorSpeed =  inData.substring(8).toInt();
+        motorSpeed =  inData.substring(8, 11).toInt();
+        if(inData.length() > 12) {
+            timeToRun = inData.substring(12).toInt();
+        }
       }
 
       if(inData.startsWith("leng")) {
         L_EngOn = true;
         L_EngFwd = true;
 
-        timeRightMotor=0;
-        timeLeftMotor=0;
-
-        motorSpeed =  inData.substring(4).toInt();
+        motorSpeed =  inData.substring(4, 7).toInt();
+        if(inData.length() > 8) {
+            timeToRun = inData.substring(8).toInt();
+        }
       }
 
       if(inData.startsWith("rev_leng")) {
         L_EngOn = true;
         L_EngFwd = false;
 
-        timeRightMotor=0;
-        timeLeftMotor=0;
-
-        motorSpeed =  inData.substring(8).toInt();
+        motorSpeed =  inData.substring(8, 11).toInt();
+        if(inData.length() > 12) {
+            timeToRun = inData.substring(12).toInt();
+        }
       }
+//      Serial.print("MotorSpeed=");
+//      Serial.print(motorSpeed);
+//      Serial.print(" timeToRun=");
+//      Serial.println(timeToRun);
 
       inData = ""; //clear previous message
       Serial.flush();
@@ -156,27 +155,33 @@ void loop()
   }
 
   if(L_EngOn || R_EngOn) {
-    Serial.print("LE=");
-    Serial.print(L_EngOn);
+//    Serial.print("LE=");
+//    Serial.print(L_EngOn);
 
-    Serial.print(" RE=");
-    Serial.print(R_EngOn);
+//    Serial.print(" RE=");
+//    Serial.print(R_EngOn);
 
-    Serial.print(" time=");
-    Serial.println(timeMotor);
+//    Serial.print(" time=");
+//    Serial.println(timeMotor);
     if(timeMotor >= timeToRun || stopCommanded) {
-      stopEngines();            
+      stopEngines();
     } 
     else {
-      Serial.println(timeMotor);
+//      Serial.println(timeMotor);
       delay(100);
       timeMotor += 100;
     }      
   }
+
+  if(stopCommanded) {
+     Serial.println("Stopped engines");
+     stopCommanded = false;
+  }
+
 }
 
 void startAllEngine() {
-  Serial.println("Stopping ALL engines");
+//  Serial.println("Stopping ALL engines");
 
   if(L_EngFwd && R_EngFwd) {
     digitalWrite(IN1, HIGH);
@@ -197,8 +202,8 @@ void startAllEngine() {
 }
 
 void startLeftEngine() {
-  Serial.print("startLeft FWD=");
-  Serial.println(L_EngFwd);
+//  Serial.print("startLeft FWD=");
+//  Serial.println(L_EngFwd);
 
   if(L_EngFwd) {
     digitalWrite(IN1, HIGH);
@@ -208,13 +213,13 @@ void startLeftEngine() {
     digitalWrite(IN1, LOW);
     digitalWrite(IN2, HIGH);     
   }
+
   analogWrite(ENA, motorSpeed);
-  Serial.println("started Left");
 }
 
 void startRightEngine() {
-  Serial.print("startRight FWD=");
-  Serial.println(R_EngFwd);
+//  Serial.print("startRight FWD=");
+//  Serial.println(R_EngFwd);
 
   if(R_EngFwd) {
     digitalWrite(IN3, HIGH);
@@ -228,8 +233,8 @@ void startRightEngine() {
   analogWrite(ENB, motorSpeed);
 }
 
-void stopEngines() {  
-  Serial.println("Stopping engine");
+void stopEngines() {
+//Serial.println("Stopping engine");
   digitalWrite(IN1, LOW); 
   digitalWrite(IN2, LOW); 
 
@@ -242,7 +247,6 @@ void stopEngines() {
   L_EngOn = false;
   R_EngOn = false;
 
-  timeMotor = 1500;  
-  Serial.println("Stopped engine");
+  stopCommanded = true;
 }
 

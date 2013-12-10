@@ -3,17 +3,6 @@ RBOT.smooth = RBOT.smooth || {};
 
 (function() {
 
-    var speedKnob = $("#speed");
-    speedKnob.knob({
-        min : 0,
-        max : 6,
-        'skin':"tron",
-        displayInput : false,
-        'change' : function (value) {
-            console.log(value);
-        }
-    });
-
     var btnFwd = $('#forward'),
         btnBack = $('#back'),
         btnLeft = $('#left'),
