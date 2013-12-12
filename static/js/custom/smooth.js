@@ -6,7 +6,8 @@ RBOT.smooth = RBOT.smooth || {};
     var btnFwd = $('#forward'),
         btnBack = $('#back'),
         btnLeft = $('#left'),
-        btnRight = $('#right');
+        btnRight = $('#right'),
+        timeoutId;
 
     function registerTimeout(motorCommand) {
         clearTimeout(timeoutId);
@@ -22,6 +23,10 @@ RBOT.smooth = RBOT.smooth || {};
         var hammertimeBtn = Hammer(jqBtn.get(0));
         hammertimeBtn.on("release", function(ev) {
             ev.preventDefault();
+            jqBtn.removeClass('active');
+
+            btnFwd.css('color', 'green');
+
             clearTimeout(timeoutId);
         });
     }
@@ -30,6 +35,9 @@ RBOT.smooth = RBOT.smooth || {};
         var hammertimeBtn = Hammer(jqBtn.get(0));
         hammertimeBtn.on("touch", function(ev) {
             ev.preventDefault();
+            jqBtn.addClass('active');
+
+            btnFwd.css('color', 'red');
 
             motorAction();
             registerTimeout(function() {

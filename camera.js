@@ -1,120 +1,136 @@
-var lastCaptureId = 1,
-    lastToDelete = 1,
-    delivering,
-    deleteIntervalId,
-    isWatching,
-    cameraExec;
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+}
 
-var watcher = require('chokidar'),
-    fs  = require('fs');
+define([ 'chokidar', 'delivery', 'fs' ], function( Watcher, Delivery, Fs) {
 
-var setupCaptureDir = function() {
-    var dir = '/tmp/rvid';
-    if(!fs.existsSync(dir)) {
-        fs.mkdir(dir, function(err) {
-            if(err) {
-                throw err;
+    var Camera = function(app) {
+        this.lastCaptureId = 1;
+        this.lastToDelete = 1;
+        this.delivering = false;
+        this.isWatching = false;
+
+        this.deleteIntervalId = null;
+        this.cameraExec = null;
+
+
+    };
+
+    function stopFileWatch() {
+        Watcher.close();
+    }
+
+    function getCaptureFileName(itemId) {
+        return '/tmp/rvid/cam' + itemId + '.jpg';
+    }
+
+    function deleteOldCapture() {
+        for(var i=lastToDelete; i < lastCaptureId; i ++) {
+            deleteCaptureFile(getCaptureFileName(i));
+        }
+        lastToDelete = lastCaptureId;
+    }
+
+    var deleteCaptureFile = function(fileName) {
+        console.log('Deleting ' + fileName);
+        Fs.unlink(fileName, function (err) {
+            if (err) {
+                console.error('Could not delete ' + fileName + ' ' + err);
+            } else {
+                console.log('successfully deleted ' + fileName);
             }
         });
+    };
+
+    function cleanupAfterCapture() {
+        lastCaptureId = 1;
+        lastToDelete = 1;
+
+        stopFileWatch();
+        clearInterval(this.deleteIntervalId);
     }
-};
 
-var deleteOldCapture = function() {
-    for(var i=lastToDelete; i < lastCaptureId; i ++) {
-        deleteCaptureFile(getCaptureFileName(i));
-    }
-    lastToDelete = lastCaptureId;
-};
-
-var deleteCaptureFile = function(fileName) {
-    console.log('Deleting ' + fileName);
-    fs.unlink(fileName, function (err) {
-        if (err) {
-            console.error('Could not delete ' + fileName + ' ' + err);
-        } else {
-            console.log('successfully deleted ' + fileName);
-        }
-    });
-};
-
-var startFileWatch = function() {
-    watcher.watch('/tmp/rvid', {ignored: /^\./}).on('add', function(f) {
-        var itemId = f.substr('/tmp/rvid/cam'.length);
-        if(f.indexOf('~') === -1) {
-            itemId = itemId.replace('.jpg', '');
-
-            var recentCaptureId = parseInt(itemId);
-            console.log('Captured ' + recentCaptureId);
-            if(recentCaptureId >= lastCaptureId) {
-                lastCaptureId = recentCaptureId;
-                deliverCapture(getCaptureFileName(lastCaptureId));
+    function deliverCapture(filename) {
+        if(isWatching) {
+            console.log('Delivering ' + filename);
+            if(! delivering) {
+                console.log('Sending ' + filename);
+                delivering = true;
+                delivery.send({
+                    name: lastCaptureId + '.jpg',
+                    path : filename
+                });
             }
         }
-    });
-};
+    }
 
-var startCapture = function() {
-    isWatching = true;
+    Camera.prototype.init = function() {
+        var delivery = this.app.get("clientSocket");
+
+        delivery.on('send.success', function(file) {
+            console.log('Delivered ' + file);
+        });
+    };
+
+    Camera.prototype.setupCaptureDir = function() {
+        var dir = '/tmp/rvid';
+        if(!Fs.existsSync(dir)) {
+            Fs.mkdir(dir, function(err) {
+                if(err) {
+                    throw err;
+                }
+            });
+        }
+    };
+
+    Camera.prototype.startFileWatch = function() {
+        Watcher.watch('/tmp/rvid', {ignored: /^\./}).on('add', function(f) {
+            var itemId = f.substr('/tmp/rvid/cam'.length);
+            if(f.indexOf('~') === -1) {
+                itemId = itemId.replace('.jpg', '');
+
+                var recentCaptureId = parseInt(itemId);
+                console.log('Captured ' + recentCaptureId);
+                if(recentCaptureId >= lastCaptureId) {
+                    lastCaptureId = recentCaptureId;
+                    deliverCapture(getCaptureFileName(lastCaptureId));
+                }
+            }
+        });
+    };
+
+    Camera.prototype.startCapture = function() {
+        this.isWatching = true;
+        var that = this;
+
 //        var cmd = 'streamer -t 100 -r 1 -q -C /dev/video0 -o';
 //        console.log('Capturing: ' + cmd);
 
-    var spawn = ChildProcess.spawn;
+        var spawn = ChildProcess.spawn;
 //        var cameraExec = spawn('raspistill', ['-b 2', '-t 100 -r 1 -q -C', '/dev/video0', '-o /tmp/rvid/cam00.jpeg'],
-    cameraExec = spawn('raspistill', ['-w','640','-h','480','-q','85','-tl','1000','-t','10000','-th','0:0:0',
-        '-o','/tmp/rvid/cam%d.jpg'], { stdio: 'inherit'});
+        cameraExec = spawn('raspistill', ['-w','640','-h','480','-q','85','-tl','1000','-t','10000','-th','0:0:0',
+            '-o','/tmp/rvid/cam%d.jpg'], { stdio: 'inherit'});
 
-    cameraExec.on('close', function(code) {
-        cleanupAfterCapture();
+        cameraExec.on('close', function(code) {
+            cleanupAfterCapture();
 
-        if(isWatching) {
-            startCapture(); //restarts
-        }
-    });
+            if(that.isWatching) {
+                startCapture(); //restarts
+            }
+        });
 
-    startFileWatch();
-    deleteIntervalId = setInterval(deleteOldCapture, 5 * 1000);
-};
+        startFileWatch();
+        deleteIntervalId = setInterval(deleteOldCapture, 5 * 1000);
+    };
 
-function getCaptureFileName(itemId) {
-    return '/tmp/rvid/cam' + itemId + '.jpg';
-}
-
-var cleanupAfterCapture = function() {
-    lastCaptureId = 1;
-    lastToDelete = 1;
-
-    stopFileWatch();
-    clearInterval(deleteIntervalId);
-};
-
-function deliverCapture(filename) {
-    if(isWatching) {
-        console.log('Delivering ' + filename);
-        if(! delivering) {
-            console.log('Sending ' + filename);
-            delivering = true;
-            delivery.send({
-                name: lastCaptureId + '.jpg',
-                path : filename
-            });
+    Camera.prototype.stopCapture = function() {
+        isWatching = false;
+        if(cameraExec) {
+            cameraExec.kill();
         }
     }
-}
 
-function stopCapture() {
-    isWatching = false;
-    if(cameraExec) {
-        cameraExec.kill();
-    }
-}
 
-function stopFileWatch() {
-    watcher.close();
-}
+});
 
-module.exports.delivering = delivering;
-module.exports.setupCaptureDir = setupCaptureDir;
-module.exports.deleteCaptureFile = deleteCaptureFile;
-module.exports.deleteOldCapture = deleteOldCapture;
-module.exports.stopCapture = stopCapture;
 

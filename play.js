@@ -1,45 +1,28 @@
-(function () {
-    "use strict";
+var requirejs = require('requirejs');
+requirejs.config({
+    nodeRequire: require
+});
 
-    var express = require('express'),
-        path = require('path'),
-        app = express(),
-        http = require('http').createServer(app),
-        serialport = require("serialport"),
-        SerialPort  = serialport.SerialPort,
-        Delivery  = require('delivery'),
-        io = require('socket.io').listen(http),
+requirejs([ 'http', 'path', 'express', 'socket.io', './path_actions', './motors' ],
+        function(Http, Path, Express, Socketio, PathActions, Motors) {
 
-        pathActions = require('./path_actions'),
-        camera = require('./camera'),
-        Commons = require('./commons');
+    var Delivery  = require('delivery');
 
-    var clientSocket,
-        baseSpeed = 180,
-        delivery,
-        serialFeedback;
+//        camera = require('./camera'),
 
-    var arduinoSerial = new SerialPort("/dev/ttyACM0", {
-        baudrate: 19200,
-        parser: serialport.parsers.readline("\n")
-    });
-
-    arduinoSerial.open(function () {
-        console.log('open');
-        arduinoSerial.on('data', function(data) {
-            serialFeedback = data.trim();
-            if(serialFeedback === 'Stopped engines') {
-                if(pathActions.actions) {
-                    pathActions.executeNextPathAction(motorCommand);
-                    clientSocket.emit('executing', { action : pathActions.lastExecutedPathAction });
-                }
-            }
-            console.log('data received: "' + serialFeedback + '"');
-        });
-    });
+    var app = Express();
+    var server = Http.createServer(app).listen(8000);
+    var io = Socketio.listen(server),
+        pathActions = new PathActions(app),
+        motors = new Motors(app);
 
 
-    app.use(express.static(path.join(__dirname, 'static')));
+    var clientSocket;
+
+
+    app.use(Express.static(Path.join(__dirname, 'static')));
+    app.set('motors', motors);
+    app.set('pathActions', pathActions);
 
     var html_dir = './static/';
 
@@ -48,86 +31,56 @@
         res.sendfile(html_dir + 'index.html');
     });
 
-    var handleSerialResponse = function(err, results) {
-        console.log('err ' + err);
-        console.log('handling results ' + results);
-    };
-
-    function motorCommand(command, data) {
-        console.log('Data ' + JSON.stringify(data));
-        command += getArduinoSpeed(data.val);
-        if(data.timeMs) {
-            command += '_' + data.timeMs;
-        }
-        command += "\n";
-
-        console.log('Command ' + command);
-
-        arduinoSerial.write(command, handleSerialResponse);
-    }
 
     // listen for new socket.io connections:
     io.sockets.on('connection', function (socket) {
         console.log('Connected');
         clientSocket = socket;
-        delivery = Delivery.listen(clientSocket);
+        app.set('clientSocket', clientSocket);
 
         socket.on('lengine', function (data) {
-            motorCommand(Commons.LEFT_ENGINE_ON, data);
+            motors.left(data);
         });
 
         socket.on('rengine', function (data) {
-            motorCommand(Commons.RIGHT_ENGINE_ON, data);
+            motors.right(data);
         });
 
         socket.on('all_engine', function (data) {
-            motorCommand(Commons.ALL_ENGINES_ON, data);
+            motors.forward(data);
         });
 
         socket.on('rev_all_engine', function (data) {
-            motorCommand(Commons.REV_ALL_ENGINES_ON, data);
+            motors.reverse(data);
         });
 
         socket.on('exec_actions', function (data) {
             pathActions.actions = JSON.parse(data.actions);
-            console.log('ReverseEngine: ' + pathActions.actions);
+            console.log('Received Path actions: ' + pathActions.actions);
             pathActions.poz = 0;
 
-            var command = 'stop\n';
-            arduinoSerial.write(command, handleSerialResponse);
+            motors.stop();
         });
 
+        socket.on('stop_engines', function () {
+            pathActions.actions = null;
+            motors.stop();
+        });
 
         socket.on('watch', function (data) {
             console.log('*** WATCHING ***');
-            camera.startCapture();
+//            camera.startCapture();
         });
         socket.on('unwatch', function (data) {
             console.log('*** UNWATCHING ***');
-            camera.stopCapture();
-        });
-
-        delivery.on('send.success', function(file) {
-            console.log('Delivered ' + file);
-            camera.delivering = false;
+//            camera.stopCapture();
         });
 
     });
 
     io.sockets.on('disconnect', function() {
         console.log('DISConnected');
-        camera.stopCapture();
+//        camera.stopCapture();
     });
 
-
-    function getArduinoSpeed(speedGear) {
-        var speed = baseSpeed;
-
-        if(speedGear) {
-            speed += speedGear * 10;
-        }
-        return speed;
-    }
-
-    http.listen(8000);
-})();
+});

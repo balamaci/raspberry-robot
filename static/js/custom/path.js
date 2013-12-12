@@ -117,21 +117,59 @@ var RBOT = RBOT || {}
             addPathAction(poz);
         });
 
+
+        $('#path-stop').click(function(ev) {
+            ev.preventDefault();
+            sendExecutePathActions(actions[poz]);
+        });
+
+        registerPathExec();
+        registerPathReverse();
+        registerPathDelete();
+    }
+
+    function registerPathExec() {
+        $('#path-exec-all').click(function(ev) {
+            ev.preventDefault();
+            var actions = getPathActions();
+            sendExecutePathActions(actions);
+        });
         $('#path-exec').click(function(ev) {
             ev.preventDefault();
             var actions = getPathActions();
+            var poz = getSelectedEntryPoz();
 
+            sendExecutePathActions(actions[poz]);
+        });
+    }
+
+    function registerPathReverse() {
+        $('#path-rev-all').click(function(ev) {
+            ev.preventDefault();
+            var actions = getReversedPathActions();
             sendExecutePathActions(actions);
         });
 
+        $('#path-rev').click(function(ev) {
+            ev.preventDefault();
+
+            var poz = getSelectedEntryPoz();
+            var actions = getReversedPathActions();
+
+            var revAction = [];
+            revAction[0] = actions[poz];
+
+            sendExecutePathActions(revAction);
+        });
+    }
+
+    function registerPathDelete() {
         $('#path-del-all').click(function(ev) {
             ev.preventDefault();
             localStorage.removeItem("actions");
 
             renderPathItems();
         });
-
-
 
         $('#path-del-item').click(function(ev) {
             ev.preventDefault();
@@ -164,6 +202,34 @@ var RBOT = RBOT || {}
         }
 
         return actions;
+    }
+
+    function getReversedPathAction(action) {
+        var direction = action.direction;
+        switch(direction) {
+            case 'fwd' :
+                direction = 'bck';
+                break;
+            case 'bck' :
+                direction = 'fwd';
+                break;
+            case 'rgt' :
+                direction = 'lft';
+                break;
+            case 'lft' :
+                direction = 'rgt';
+                break;
+        }
+
+        return new Action(direction, action.value, action.unit);
+    }
+
+    function getReversedPathActions() {
+        var actions = getPathActions().reverse();
+
+        actions.map(function (it) {
+            return getReversedPathAction(it);
+        });
     }
 
     function registerPathListEntriesWatcher() {

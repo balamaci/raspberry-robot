@@ -10,9 +10,9 @@ var RBOT = RBOT || {}
     var hammertime = Hammer(document.getElementById("toucharea"));
     var carousel = $('#carousel');
 
-    function init() {
-        carousel.carousel('pause');
+    carousel.carousel('pause');
 
+    function init() {
         hammertime.on("swipeleft", function(ev) {
             carousel.carousel('next');
             carousel.carousel('pause');

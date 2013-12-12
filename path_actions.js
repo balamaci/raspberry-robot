@@ -1,55 +1,67 @@
-var Commons = require('./commons');
+if (typeof define !== 'function') {
+    var define = require('amdefine')(module);
+}
 
-var MOTOR_TO_CM_COEF = 500,
+define([ 'path_actions'], function(path_actions) {
 
-    adjustmentCoef = 1,
-    actions = [],
-    lastExecutedPathAction,
-    poz = 0;
+    var PathActions = function(app) {
+        this.app = app;
+        this.MOTOR_TO_CM_COEF = 50;
 
-var convertUnitToTime = function(value, unit) {
-    if(unit === 'm') {
-        value *= 100;
-    }
-    value *= MOTOR_TO_CM_COEF;
+        this.adjustmentCoef = 1;
 
-    value *= adjustmentCoef;
+        this.actions = [];
+        this.poz = 0;
 
-    return value;
-};
+        this.lastExecutedPathAction = null;
+    };
 
 
-var executeNextPathAction = function (motorCommand) {
-    if(this.poz >= this.actions.length) {
-        return;
-    }
-
-    var action = this.actions[this.poz];
-
-    var motorDirection = function(direction) {
-        switch(direction) {
-
-            case 'fwd' : return Commons.ALL_ENGINES_ON;
-            case 'bck' : return Commons.REV_ALL_ENGINES_ON;
-            case 'lft' : return Commons.LEFT_ENGINE_ON;
-            case 'rgt' : return Commons.RIGHT_ENGINE_ON;
-
-            default : return 'unknown';
+    PathActions.prototype.convertUnitToTime = function(value, unit) {
+        if(unit === 'meter') {
+            value *= 100;
         }
+        value *= MOTOR_TO_CM_COEF;
+
+        value *= adjustmentCoef;
+
+        return value;
     };
-    var data = {
-        timeMs : convertUnitToTime(action.value, action.unit)
+
+
+    PathActions.prototype.executeNextPathAction = function (motorCommand) {
+        if(poz >= actions.length) {
+            return;
+        }
+
+        var action = actions[poz];
+
+        var data = {
+            timeMs : convertUnitToTime(motorDirection(action.value), action.unit)
+        };
+
+
+        var motors = app.get('motors');
+        var direction = action.direction;
+
+        if(direction == 'fwd') {
+            motors.forward(data);
+        }
+        if(direction == 'bck') {
+            motors.reverse(data);
+        }
+        if(direction == 'lft') {
+            motors.left(data);
+        }
+        if(direction == 'rgt') {
+            motors.right(data);
+        }
+
+        lastExecutedPathAction = action;
+        poz++;
     };
 
-    motorCommand.call(undefined, motorDirection(action.direction), data);
-    this.lastExecutedPathAction = action;
-    this.poz++;
-};
+    var exports = PathActions;
 
-
-module.exports.adjustmentCoef = adjustmentCoef;
-module.exports.actions = actions;
-module.exports.poz = poz;
-module.exports.lastExecutedPathAction = lastExecutedPathAction;
-module.exports.convertUnitToTime = convertUnitToTime;
-module.exports.executeNextPathAction = executeNextPathAction;
+    return exports;
+});

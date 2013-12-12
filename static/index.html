@@ -39,7 +39,7 @@
                     <div class="panel-heading">Smooth Controls</div>
                     <div class="panel-body">
                         <div class="row">
-                            <div class="col-md-6 col-lg-6 col-xs-12">
+                            <div class="col-md-6 col-xs-12">
                                 <div class="row">
                                     <div class="col-xs-12" style="text-align: center">
                                         <a id="forward" href="#" class="btn btn-lg btn-danger">
@@ -135,11 +135,11 @@
                                 </div>
 
                                 <div class="row" style="padding-top: 30px;">
-                                    <div class="col-xs-2">
+                                    <div class="col-xs-3">
                                         <input id="path-unit-value" type="number" class="form-control" name="path-unit-value"/>
                                     </div>
 
-                                    <div class="col-xs-5" id="dst-measurement-panel">
+                                    <div class="col-xs-9" id="dst-measurement-panel">
                                         <a id="meter" href="#" class="btn btn-default units dst-measurement">
                                             <span class="glyphicon glyphicon-circle-arrow-right"></span>
                                             M
@@ -149,13 +149,15 @@
                                             cm
                                         </a>
                                     </div>
-                                    <div class="col-xs-5" id="deg-measurement-panel" style="display: none;">
+                                    <div class="col-xs-9" id="deg-measurement-panel" style="display: none;">
                                         <a id="deg" href="#" class="btn btn-default units deg-measurement">
                                             <span class="glyphicon glyphicon-circle-arrow-right"></span>
                                             deg
                                         </a>
                                     </div>
-                                    <div class="col-xs-5 btn-group">
+                                </div>
+                                <div class="row" style="padding-top: 20px;">
+                                    <div class="col-xs-9 col-xs-offset-3 btn-group">
                                         <a id="add-path" href="#" class="btn btn-default">
                                             <span class="glyphicon glyphicon-floppy-open"></span>
                                             ADD
@@ -187,20 +189,46 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-xs-6 col-md-6 btn-group">
-                                        <a id="path-exec" href="#" class="btn btn-default">
-                                            <span class="glyphicon glyphicon-play-circle"></span>
-                                            Execute!
-                                        </a>
+                                    <div class="col-xs-12">
+                                        <div class="btn-group">
+                                            <a id="path-exec" href="#" class="btn btn-info">
+                                                <span class="glyphicon glyphicon-play-circle"></span>
+                                                Execute
+                                            </a>
+                                            <a id="path-all-exec" href="#" class="btn btn-success">
+                                                <span class="glyphicon glyphicon-play-circle"></span>
+                                                Execute All
+                                            </a>
+                                        </div>
                                     </div>
-                                    <div class="col-xs-6 col-md-6 btn-group">
-                                        <a id="path-del-item" href="#" class="btn btn-default">
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-12" style="padding-top: 20px;">
+                                        <div class="btn-group">
+                                            <a id="path-rev" href="#" class="btn btn-primary">
+                                                <span class="glyphicon glyphicon-play-circle"></span>
+                                                Reverse
+                                            </a>
+                                            <a id="path-rev-all" href="#" class="btn btn-danger">
+                                                <span class="glyphicon glyphicon-repeat"></span>
+                                                Reverse All
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-md-12 btn-group" style="padding-top: 20px;">
+                                        <a id="path-del-item" href="#" class="btn btn-warning">
                                             <span class="glyphicon glyphicon-minus-sign"></span>
                                             Delete
                                         </a>
                                         <a id="path-del-all" href="#" class="btn btn-danger">
                                             <span class="glyphicon glyphicon-minus-sign"></span>
                                             Delete All
+                                        </a>
+                                    </div>
+                                    <div class="col-xs-12 btn-group" style="padding-top: 20px;">
+                                        <a id="path-stop" href="#" class="btn btn-danger">
+                                            <span class="glyphicon glyphicon-play-circle"></span>
+                                            Stop
                                         </a>
                                     </div>
                                 </div>
@@ -267,6 +295,9 @@
     function sendExecutePathActions() {
         var jsonActions = localStorage.getItem("actions");
         socket.emit('exec_actions', { actions : jsonActions });
+    }
+    function sendStopExecutePathActions() {
+        socket.emit('stop_engines');
     }
 
     $('#camera-start').on('click', function (ev) {
