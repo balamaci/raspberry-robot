@@ -195,7 +195,7 @@
                                                 <span class="glyphicon glyphicon-play-circle"></span>
                                                 Execute
                                             </a>
-                                            <a id="path-all-exec" href="#" class="btn btn-success">
+                                            <a id="path-exec-all" href="#" class="btn btn-success">
                                                 <span class="glyphicon glyphicon-play-circle"></span>
                                                 Execute All
                                             </a>
@@ -292,8 +292,8 @@
     function leftEngineSend() {
         socket.emit('lengine', { val : speedKnob.val()});
     }
-    function sendExecutePathActions() {
-        var jsonActions = localStorage.getItem("actions");
+    function sendExecutePathActions(actions) {
+        var jsonActions = JSON.stringify(actions);
         socket.emit('exec_actions', { actions : jsonActions });
     }
     function sendStopExecutePathActions() {

@@ -20,27 +20,29 @@ define([ 'serialport'], function(SerialPort) {
     Motors.prototype.init = function() {
         var that = this;
 
-        this.arduinoSerial = new SerialPort.SerialPort(this.arduinoSerialPort, {
+        var arduinoSerial = new SerialPort.SerialPort(this.arduinoSerialPort, {
             baudrate: 19200,
             parser: SerialPort.parsers.readline("\n")
         });
 
-        this.arduinoSerial.open(function () {
+        arduinoSerial.open(function () {
 
             var pathActions = that.app.get('pathActions');
-            var clientSocket = that.app.get('clientSocket');
 
             arduinoSerial.on('data', function(data) {
                 serialFeedback = data.trim();
                 if(serialFeedback === 'Stopped engines') {
                     if(pathActions.actions) {
-                        pathActions.executeNextPathAction(motorCommand);
+                        pathActions.executeNextPathAction();
+
+                        var clientSocket = that.app.get('clientSocket');
                         clientSocket.emit('executing', { action : pathActions.lastExecutedPathAction });
                     }
                 }
                 console.log('data received: "' + serialFeedback + '"');
             });
         });
+        this.arduinoSerial = arduinoSerial;
     };
 
     Motors.prototype.left = function(data) {

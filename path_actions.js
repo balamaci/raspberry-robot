@@ -21,27 +21,27 @@ define([ 'path_actions'], function(path_actions) {
         if(unit === 'meter') {
             value *= 100;
         }
-        value *= MOTOR_TO_CM_COEF;
+        value *= this.MOTOR_TO_CM_COEF;
 
-        value *= adjustmentCoef;
+        value *= this.adjustmentCoef;
 
         return value;
     };
 
 
-    PathActions.prototype.executeNextPathAction = function (motorCommand) {
-        if(poz >= actions.length) {
+    PathActions.prototype.executeNextPathAction = function () {
+        if(this.poz >= this.actions.length) {
             return;
         }
 
-        var action = actions[poz];
+        var action = this.actions[this.poz];
 
         var data = {
-            timeMs : convertUnitToTime(motorDirection(action.value), action.unit)
+            timeMs : this.convertUnitToTime(action.value, action.unit)
         };
 
 
-        var motors = app.get('motors');
+        var motors = this.app.get('motors');
         var direction = action.direction;
 
         if(direction == 'fwd') {
@@ -57,8 +57,8 @@ define([ 'path_actions'], function(path_actions) {
             motors.right(data);
         }
 
-        lastExecutedPathAction = action;
-        poz++;
+        this.lastExecutedPathAction = action;
+        this.poz++;
     };
 
     var exports = PathActions;

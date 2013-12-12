@@ -6,10 +6,6 @@ requirejs.config({
 requirejs([ 'http', 'path', 'express', 'socket.io', './path_actions', './motors' ],
         function(Http, Path, Express, Socketio, PathActions, Motors) {
 
-    var Delivery  = require('delivery');
-
-//        camera = require('./camera'),
-
     var app = Express();
     var server = Http.createServer(app).listen(8000);
     var io = Socketio.listen(server),
@@ -56,7 +52,7 @@ requirejs([ 'http', 'path', 'express', 'socket.io', './path_actions', './motors'
 
         socket.on('exec_actions', function (data) {
             pathActions.actions = JSON.parse(data.actions);
-            console.log('Received Path actions: ' + pathActions.actions);
+            console.log('Received Path actions: ' + JSON.stringify(pathActions.actions));
             pathActions.poz = 0;
 
             motors.stop();

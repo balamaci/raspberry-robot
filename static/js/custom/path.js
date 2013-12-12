@@ -139,7 +139,9 @@ var RBOT = RBOT || {}
             var actions = getPathActions();
             var poz = getSelectedEntryPoz();
 
-            sendExecutePathActions(actions[poz]);
+            var executeActions = [ actions[poz] ];
+
+            sendExecutePathActions(executeActions);
         });
     }
 
