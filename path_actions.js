@@ -6,7 +6,7 @@ define([ 'path_actions'], function(path_actions) {
 
     var PathActions = function(app) {
         this.app = app;
-        this.MOTOR_TO_CM_COEF = 50;
+        this.MOTOR_TO_CM_COEF = 27.5;
 
         this.adjustmentCoef = 1;
 
@@ -20,6 +20,9 @@ define([ 'path_actions'], function(path_actions) {
     PathActions.prototype.convertUnitToTime = function(value, unit) {
         if(unit === 'meter') {
             value *= 100;
+        }
+        if(unit === 'deg') {
+            value *= 2;
         }
         value *= this.MOTOR_TO_CM_COEF;
 

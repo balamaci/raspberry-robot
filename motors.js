@@ -4,17 +4,10 @@ if (typeof define !== 'function') {
 
 define([ 'serialport'], function(SerialPort) {
 
-    var handleSerialResponse = function(err, results) {
-        console.log('err ' + err);
-        console.log('handling results ' + results);
-    };
-
     var Motors = function(app) {
         this.app = app;
         this.baseSpeed = 180;
         this.arduinoSerialPort = "/dev/ttyACM0";
-
-        this.init();
     };
 
     Motors.prototype.init = function() {
@@ -54,11 +47,11 @@ define([ 'serialport'], function(SerialPort) {
     };
 
     Motors.prototype.forward = function(data) {
-        this.motorCommand("all_engine", data);
+        this.motorCommand("all_eng", data);
     };
 
     Motors.prototype.reverse = function(data) {
-        this.motorCommand("rev_all_engine", data);
+        this.motorCommand("rev_all_eng", data);
     };
 
     Motors.prototype.motorCommand = function(command, data) {
@@ -70,11 +63,28 @@ define([ 'serialport'], function(SerialPort) {
         command += "\n";
 
         console.log('Command ' + command);
-        this.arduinoSerial.write(command, handleSerialResponse);
+        var that = this;
+        this.arduinoSerial.write(command, function(err, results) {
+            var clientSocket = that.app.get('clientSocket');
+            that.handleSerialResponse(err, results, clientSocket);
+        });
     };
 
     Motors.prototype.stop = function() {
-        this.arduinoSerial.write('stop\n', handleSerialResponse);
+        var that = this;
+        this.arduinoSerial.write('stop\n', function(err, results) {
+            var clientSocket = that.app.get('clientSocket');
+            that.handleSerialResponse(err, results, clientSocket);
+        });
+    };
+
+    Motors.prototype.handleSerialResponse = function(err, results, clientSocket) {
+        if(err) {
+            console.log('err ' + err);
+            clientSocket.emit('motor_error', { error : err.message });
+        }
+
+//        console.log('serial response ' + results);
     };
 
     Motors.prototype.getArduinoSpeed = function(speedGear) {

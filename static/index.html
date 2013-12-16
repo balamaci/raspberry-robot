@@ -32,7 +32,8 @@
 <body id="home">
 
 <div class="container" id="toucharea">
-    <div class="carousel slide" id="carousel" data-ride="carousel">
+
+    <div class="carousel slide" id="carousel">
         <div class="carousel-inner">
             <div class="item active">
                 <div class="panel panel-default" id="smooth-controls">
@@ -239,6 +240,10 @@
             </div>
         </div>
     </div>
+    <div id="feedback" class="alert">
+        <a class="close" data-dismiss="alert" href="#" aria-hidden="true">&times;</a>
+        <p></p>
+    </div>
 </div>
 
 <script src="/js/custom/nav.js"></script>
@@ -280,6 +285,12 @@
         RBOT.path.addExecutedPathAction(data.action);
     });
 
+    socket.on('motor_error', function(data) {
+        var feedback = $('#feedback');
+        feedback.addClass('alert-danger');
+        feedback.find('p').html(data.error);
+    });
+
     function allEngineSend() {
         socket.emit('all_engine', { val : speedKnob.val()});
     }
@@ -302,7 +313,6 @@
 
     $('#camera-start').on('click', function (ev) {
         ev.preventDefault();
-        console.log('Sending watch');
         socket.emit('watch');
     });
 

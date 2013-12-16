@@ -113,7 +113,9 @@ var RBOT = RBOT || {}
         var hammAddBefore = Hammer(btnPathAddBefore.get(0));
         hammAddBefore.on('tap', function(ev) {
             var poz = getSelectedEntryPoz();
-
+            if(poz > 0) {
+                poz--;
+            }
             addPathAction(poz);
         });
 
@@ -149,6 +151,7 @@ var RBOT = RBOT || {}
         $('#path-rev-all').click(function(ev) {
             ev.preventDefault();
             var actions = getReversedPathActions();
+
             sendExecutePathActions(actions);
         });
 
@@ -156,10 +159,9 @@ var RBOT = RBOT || {}
             ev.preventDefault();
 
             var poz = getSelectedEntryPoz();
-            var actions = getReversedPathActions();
+            var action = getPathActions() [poz];
 
-            var revAction = [];
-            revAction[0] = actions[poz];
+            var revAction = [ getReversedPathAction(action) ];
 
             sendExecutePathActions(revAction);
         });
@@ -229,7 +231,7 @@ var RBOT = RBOT || {}
     function getReversedPathActions() {
         var actions = getPathActions().reverse();
 
-        actions.map(function (it) {
+        return actions.map(function (it) {
             return getReversedPathAction(it);
         });
     }

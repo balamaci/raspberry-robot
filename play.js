@@ -34,6 +34,8 @@ requirejs([ 'http', 'path', 'express', 'socket.io', './path_actions', './motors'
         clientSocket = socket;
         app.set('clientSocket', clientSocket);
 
+        motors.init();
+
         socket.on('lengine', function (data) {
             motors.left(data);
         });
@@ -51,6 +53,7 @@ requirejs([ 'http', 'path', 'express', 'socket.io', './path_actions', './motors'
         });
 
         socket.on('exec_actions', function (data) {
+            console.log('Received **: ' + JSON.stringify(data));
             pathActions.actions = JSON.parse(data.actions);
             console.log('Received Path actions: ' + JSON.stringify(pathActions.actions));
             pathActions.poz = 0;
