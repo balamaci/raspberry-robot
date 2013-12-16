@@ -14,15 +14,20 @@ var RBOT = RBOT || {}
 
     function init() {
         hammertime.on("swipeleft", function(ev) {
+            ev.gesture.preventDefault();
+
             carousel.carousel('next');
             carousel.carousel('pause');
         });
 
         hammertime.on("swiperight", function(ev) {
+            ev.gesture.preventDefault();
+
             carousel.carousel('prev');
             carousel.carousel('pause');
         });
 
+/*
         carousel.on('slide.bs.carousel', function () {
             smoothControlsPanel.css('opacity', '0.6');
             navPathPanel.css('opacity', '0.6');
@@ -32,6 +37,7 @@ var RBOT = RBOT || {}
             smoothControlsPanel.css('opacity', '1');
             navPathPanel.css('opacity', '1');
         });
+*/
     }
 
     RBOT.nav.init = init;

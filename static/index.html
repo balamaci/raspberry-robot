@@ -75,7 +75,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-xs-12 col-lg-6" style="text-align: center">
+                            <div class="col-xs-12 col-md-6" style="text-align: center">
                                 <input id="speed" type="text" value="0" class="dial" style="margin-top: 50px;">
                             </div>
                         </div>
@@ -240,7 +240,8 @@
             </div>
         </div>
     </div>
-    <div id="feedback" class="alert">
+
+    <div id="feedback" class="alert" style="display:none">
         <a class="close" data-dismiss="alert" href="#" aria-hidden="true">&times;</a>
         <p></p>
     </div>
@@ -273,6 +274,7 @@
     RBOT.path.init();
 
     socket.on('connect', function() {
+
         delivery = new Delivery(socket);
         delivery.on('receive.success',function(file){
             if (file.isImage()) {
@@ -281,10 +283,12 @@
         });
     });
 
+    //Callback when the PI sends back messages about the path program it executed
     socket.on('executed', function(data) {
         RBOT.path.addExecutedPathAction(data.action);
     });
 
+    //Render error messages from the PI
     socket.on('motor_error', function(data) {
         var feedback = $('#feedback');
         feedback.addClass('alert-danger');
@@ -292,17 +296,18 @@
     });
 
     function allEngineSend() {
-        socket.emit('all_engine', { val : speedKnob.val()});
+        //socket.emit('all_engine', { val : speedKnob.val()});
     }
     function revAllEngineSend() {
-        socket.emit('rev_all_engine', { val : speedKnob.val()});
+        //socket.emit('rev_all_engine', { val : speedKnob.val()});
     }
     function rightEngineSend() {
-        socket.emit('rengine', { val : speedKnob.val()});
+        //socket.emit('rengine', { val : speedKnob.val()});
     }
     function leftEngineSend() {
-        socket.emit('lengine', { val : speedKnob.val()});
+        //socket.emit('lengine', { val : speedKnob.val()});
     }
+
     function sendExecutePathActions(actions) {
         var jsonActions = JSON.stringify(actions);
         socket.emit('exec_actions', { actions : jsonActions });

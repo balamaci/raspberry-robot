@@ -25,8 +25,7 @@ RBOT.smooth = RBOT.smooth || {};
             ev.preventDefault();
             jqBtn.removeClass('active');
 
-            btnFwd.css('color', 'green');
-
+            $('#lbl').html('Release');
             clearTimeout(timeoutId);
         });
     }
@@ -37,8 +36,7 @@ RBOT.smooth = RBOT.smooth || {};
             ev.preventDefault();
             jqBtn.addClass('active');
 
-            btnFwd.css('color', 'red');
-
+            $('#lbl').html('Pressed');
             motorAction();
             registerTimeout(function() {
                 motorAction();
