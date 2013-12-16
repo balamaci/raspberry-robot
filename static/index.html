@@ -207,7 +207,7 @@
                                     <div class="col-xs-12" style="padding-top: 20px;">
                                         <div class="btn-group">
                                             <a id="path-rev" href="#" class="btn btn-primary">
-                                                <span class="glyphicon glyphicon-play-circle"></span>
+                                                <span class="glyphicon glyphicon-arrow-left"></span>
                                                 Reverse
                                             </a>
                                             <a id="path-rev-all" href="#" class="btn btn-danger">
@@ -296,16 +296,16 @@
     });
 
     function allEngineSend() {
-        //socket.emit('all_engine', { val : speedKnob.val()});
+        socket.emit('all_engine', { val : speedKnob.val()});
     }
     function revAllEngineSend() {
-        //socket.emit('rev_all_engine', { val : speedKnob.val()});
+        socket.emit('rev_all_engine', { val : speedKnob.val()});
     }
     function rightEngineSend() {
-        //socket.emit('rengine', { val : speedKnob.val()});
+        socket.emit('rengine', { val : speedKnob.val()});
     }
     function leftEngineSend() {
-        //socket.emit('lengine', { val : speedKnob.val()});
+        socket.emit('lengine', { val : speedKnob.val()});
     }
 
     function sendExecutePathActions(actions) {
