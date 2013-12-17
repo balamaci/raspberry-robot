@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="robotApp">
+<html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
@@ -80,6 +80,14 @@
                             </div>
                         </div>
 
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <a id="device-orientation-control" href="#" class="btn btn-info">
+                                    <span class="glyphicon glyphicon-circle-arrow-right"></span>
+                                    Device orientation control
+                                </a>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-xs-6">
                                 <a id="camera-start" href="#" class="btn btn-info">
@@ -241,10 +249,19 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-xs-12">
+            <p id="orient"></p>
+        </div>
+    </div>
+
     <div id="feedback" class="alert" style="display:none">
         <a class="close" data-dismiss="alert" href="#" aria-hidden="true">&times;</a>
         <p></p>
     </div>
+
+
+
 </div>
 
 <script src="/js/custom/nav.js"></script>
@@ -291,6 +308,7 @@
     //Render error messages from the PI
     socket.on('motor_error', function(data) {
         var feedback = $('#feedback');
+        feedback.show();
         feedback.addClass('alert-danger');
         feedback.find('p').html(data.error);
     });
@@ -307,6 +325,26 @@
     function leftEngineSend() {
         socket.emit('lengine', { val : speedKnob.val()});
     }
+
+    function devOrientHandler(eventData) {
+        var tiltLR = eventData.gamma;
+
+        // beta is the front-to-back tilt in degrees, where front is positive
+        var tiltFB = eventData.beta;
+
+        // alpha is the compass direction the device is facing in degrees
+//        var dir = eventData.alpha
+
+        var text = 'LR:' + tiltLR + '\n FB:'+ tiltFB ;
+
+        $('#orient').html(text);
+    }
+
+    function enableDeviceOrientation() {
+//        window.addEventListener('deviceorientation', devOrientHandler, false);
+    }
+
+
 
     function sendExecutePathActions(actions) {
         var jsonActions = JSON.stringify(actions);

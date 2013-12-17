@@ -27,6 +27,8 @@ var RBOT = RBOT || {}
             carousel.carousel('pause');
         });
 
+
+
 /*
         carousel.on('slide.bs.carousel', function () {
             smoothControlsPanel.css('opacity', '0.6');

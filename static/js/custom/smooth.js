@@ -7,6 +7,7 @@ RBOT.smooth = RBOT.smooth || {};
         btnBack = $('#back'),
         btnLeft = $('#left'),
         btnRight = $('#right'),
+        btnEnableDeviceOrientation = $('#device-orientation-control'),
         timeoutId;
 
     function registerTimeout(motorCommand) {
@@ -25,7 +26,6 @@ RBOT.smooth = RBOT.smooth || {};
             ev.preventDefault();
             jqBtn.removeClass('active');
 
-            $('#lbl').html('Release');
             clearTimeout(timeoutId);
         });
     }
@@ -36,7 +36,6 @@ RBOT.smooth = RBOT.smooth || {};
             ev.preventDefault();
             jqBtn.addClass('active');
 
-            $('#lbl').html('Pressed');
             motorAction();
             registerTimeout(function() {
                 motorAction();
@@ -54,6 +53,10 @@ RBOT.smooth = RBOT.smooth || {};
         registerEndXEvent(btnLeft);
         registerEndXEvent(btnRight);
         registerEndXEvent(btnBack);
+
+        window.addEventListener('deviceorientation', devOrientHandler, false);
+
+//        btnEnableDeviceOrientation.on("click", );
     }
 
     RBOT.smooth.init = init;
